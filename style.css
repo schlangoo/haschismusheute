@@ -3,15 +3,15 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #f8f8f8; /* Hellgrau für besseren Kontrast */
+    background: #f8f8f8;
 }
 
 h1 {
-    color: #d40000; /* Dunkleres Rot (Augenfreundlich) */
+    color: #d40000;
     text-align: center;
     font-size: 2.5em;
     margin: 20px 0;
-    letter-spacing: 1px; /* Lesbarer */
+    letter-spacing: 1px;
 }
 
 .feed-selector {
@@ -24,51 +24,56 @@ h1 {
 
 button {
     padding: 10px 15px;
-    background: #c62828; /* Warmes Dunkelrot (Material Design Red 800) */
+    background: #c62828;
     color: white;
     border: none;
-    border-radius: 6px; /* Rundere Ecken */
+    border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    transition: background 0.3s; /* Smooth Hover */
+    transition: background 0.3s;
 }
 
 button:hover {
-    background: #8e0000; /* Tiefrot beim Hover */
+    background: #8e0000;
+}
+
+button.active {
+    background: #8e0000;
+    box-shadow: 0 0 0 2px white, 0 0 0 4px #b71c1c;
 }
 
 #feed-content {
     background: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Weicher Schatten */
-    border-left: 4px solid #b71c1c; /* Akzent-Rot (Material Design Red 900) */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #b71c1c;
 }
 
 .feed-item {
     margin-bottom: 15px;
     padding-bottom: 15px;
-    border-bottom: 1px solid #eee; /* Dünne, dezente Linie */
+    border-bottom: 1px solid #eee;
 }
 
 .feed-item h3 {
     margin: 0 0 8px 0;
-    color: #b71c1c; /* Dunkelrot für Überschriften */
+    color: #b71c1c;
 }
 
 .feed-item a {
-    color: #d32f2f; /* Rot für Links (Material Design Red 700) */
+    color: #d32f2f;
     text-decoration: none;
     font-weight: bold;
 }
 
 .feed-item a:hover {
     text-decoration: underline;
-    color: #8e0000; /* Dunkler beim Hover */
+    color: #8e0000;
 }
 
 .feed-item p {
-    color: #333; /* Dunkelgrau für bessere Lesbarkeit */
+    color: #333;
     line-height: 1.5;
 }
 
