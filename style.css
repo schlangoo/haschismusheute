@@ -125,3 +125,57 @@ button.active::after {
 .error {
     color: #8B0000;
 }
+
+/* Mobile Optimierungen */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+        padding: 0 10px 10px;
+        line-height: 1.3;
+        letter-spacing: normal;
+    }
+    
+    .greeting {
+        font-size: 1em;
+        margin-bottom: 20px;
+    }
+    
+    .feed-selector {
+        gap: 6px;
+    }
+    
+    button {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+    
+    #feed-content {
+        padding: 15px;
+    }
+    
+    .feed-item h3 {
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.5em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .feed-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    button {
+        width: 100%;
+    }
+}
