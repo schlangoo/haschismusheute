@@ -114,3 +114,14 @@ button.active::after {
     font-size: 0.85em;
     font-style: italic;
 }
+
+.no-articles, .error {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.error {
+    color: #8B0000;
+}
