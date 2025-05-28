@@ -13,10 +13,13 @@ async function loadFeed(feedKey) {
     
     let feedHTML = "";
     data.items.forEach(item => {
+        // Entfernt HTML-Tags aus der Beschreibung (für sauberen Text)
+        const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 200) + "...";
         feedHTML += `
             <div class="feed-item">
                 <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-                <p>${item.description || ""}</p>
+                <p>${cleanDescription}</p>
+                <small>${new Date(item.pubDate).toLocaleString()}</small>
             </div>
         `;
     });
