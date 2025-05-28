@@ -21,7 +21,7 @@ async function loadFeed(feedKey) {
     
     let feedHTML = "";
     data.items.forEach(item => {
-        const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 200) + "...";
+        const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
         feedHTML += `
             <div class="feed-item">
                 <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
