@@ -3,7 +3,7 @@ const RSS_FEEDS = {
     taz: "https://taz.de/!p4608;rss/",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     guardian: "https://www.theguardian.com/world/rss",
-    wire: "https://www.propublica.org/feeds"
+    propublica: "https://www.propublica.org/feeds"
 };
 
 async function loadFeed(feedKey) {
