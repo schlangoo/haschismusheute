@@ -7,13 +7,20 @@ const RSS_FEEDS = {
 };
 
 async function loadFeed(feedKey) {
+    // Entferne aktive Klasse von allen Buttons
+    document.querySelectorAll('.feed-selector button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Füge aktive Klasse zum geklickten Button hinzu
+    event.target.classList.add('active');
+    
     const feedUrl = RSS_FEEDS[feedKey];
     const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
     const data = await response.json();
     
     let feedHTML = "";
     data.items.forEach(item => {
-        // Entfernt HTML-Tags aus der Beschreibung (für sauberen Text)
         const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 200) + "...";
         feedHTML += `
             <div class="feed-item">
@@ -27,5 +34,8 @@ async function loadFeed(feedKey) {
     document.getElementById("feed-content").innerHTML = feedHTML;
 }
 
-// Standardmäßig ersten Feed laden
-loadFeed('deutschlandfunk');
+// Standardmäßig ersten Feed laden und Button als aktiv markieren
+document.addEventListener('DOMContentLoaded', function() {
+    loadFeed('deutschlandfunk');
+    document.querySelector('.feed-selector button:first-child').classList.add('active');
+});
