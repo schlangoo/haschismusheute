@@ -6,23 +6,14 @@ const RSS_FEEDS = {
     propublica: "https://www.propublica.org/feeds"
 };
 
-function needsTranslation(feedKey) {
-    return ['aljazeera', 'guardian', 'propublica'].includes(feedKey);
-}
-
 async function loadFeed(feedKey) {
+    // Entferne aktive Klasse von allen Buttons
     document.querySelectorAll('.feed-selector button').forEach(btn => {
         btn.classList.remove('active');
     });
-    event.target.classList.add('active');
     
-    // Übersetzungshinweis anzeigen/verstecken
-    const notice = document.getElementById('translation-notice');
-    if (needsTranslation(feedKey)) {
-        notice.innerHTML = '<div class="translation-note">⚠️ Automatisch übersetzter Inhalt</div>';
-    } else {
-        notice.innerHTML = '';
-    }
+    // Füge aktive Klasse zum geklickten Button hinzu
+    event.target.classList.add('active');
     
     const feedUrl = RSS_FEEDS[feedKey];
     const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
@@ -32,7 +23,7 @@ async function loadFeed(feedKey) {
     data.items.forEach(item => {
         const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 200) + "...";
         feedHTML += `
-            <div class="feed-item" ${needsTranslation(feedKey) ? 'translate="yes"' : 'translate="no"'}>
+            <div class="feed-item">
                 <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
                 <p>${cleanDescription}</p>
                 <small>${new Date(item.pubDate).toLocaleString()}</small>
@@ -43,6 +34,7 @@ async function loadFeed(feedKey) {
     document.getElementById("feed-content").innerHTML = feedHTML;
 }
 
+// Standardmäßig ersten Feed laden und Button als aktiv markieren
 document.addEventListener('DOMContentLoaded', function() {
     loadFeed('deutschlandfunk');
     document.querySelector('.feed-selector button:first-child').classList.add('active');
