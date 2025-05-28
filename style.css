@@ -81,3 +81,23 @@ button.active {
     color: #666;
     font-size: 0.8em;
 }
+
+/* Füge dies am Ende hinzu */
+#translation-notice {
+    margin: -10px 0 15px 0;
+    text-align: center;
+}
+
+.translation-note {
+    display: inline-block;
+    background: #fff3cd;
+    color: #856404;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border-left: 3px solid #ffc107;
+}
+
+[translate="yes"] {
+    font-style: italic;
+}
