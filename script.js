@@ -3,7 +3,7 @@ const RSS_FEEDS = {
     jungewelt: "https://www.jungewelt.de/feeds/newsticker.rss",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     un: "https://news.un.org/feed/subscribe/en/news/all/rss.xml",
-    nachdenkenseiten: "https://multipolar-magazin.de/atom-artikel.xml"
+    multipolar: "https://multipolar-magazin.de/atom-artikel.xml"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
