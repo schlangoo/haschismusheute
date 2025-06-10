@@ -25,6 +25,11 @@ async function loadFeed(feedKey, initialLoad = false) {
         let feedHTML = "";
         if (data.items && data.items.length > 0) {
             data.items.forEach(item => {
+                // Filtere Artikel mit "[Online-Abo]" im Titel für jungewelt
+                if (feedKey === 'jungewelt' && item.title.includes('[Online-Abo]')) {
+                    return; // Überspringe diesen Artikel
+                }
+                
                 const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
                 feedHTML += `
                     <div class="feed-item">
