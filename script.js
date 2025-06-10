@@ -6,8 +6,14 @@ const RSS_FEEDS = {
     multipolar: "https://multipolar-magazin.de/atom-artikel.xml"
 };
 
-// Übersetzungsfunktion (nutzt LibreTranslate)
+// Verbesserte Übersetzungsfunktion mit Timeout & Fehlerbehandlung
 async function translateText(text, targetLang = 'de') {
+    if (!text) return text;
+    
+    // Fallback: Wenn Übersetzung zu lange dauert (>3 Sekunden), abbrechen
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    
     try {
         const response = await fetch('https://libretranslate.de/translate', {
             method: 'POST',
@@ -17,13 +23,19 @@ async function translateText(text, targetLang = 'de') {
                 source: 'en',
                 target: targetLang,
                 format: 'text'
-            })
+            }),
+            signal: controller.signal
         });
+        
+        if (!response.ok) throw new Error("API-Fehler");
         const data = await response.json();
-        return data.translatedText || text; // Falls Fehler, Originaltext zurückgeben
+        return data.translatedText || text;
+        
     } catch (error) {
-        console.error("Übersetzungsfehler:", error);
-        return text; // Fallback: Unübersetzter Text
+        console.warn("Übersetzung fehlgeschlagen, verwende Originaltext:", error);
+        return text; // Wichtig: Immer Fallback zurückgeben
+    } finally {
+        clearTimeout(timeout);
     }
 }
 
@@ -41,15 +53,23 @@ async function loadFeed(feedKey, initialLoad = false) {
         const data = await response.json();
         
         let feedHTML = "";
-        if (data.items && data.items.length > 0) {
-            for (const item of data.items) { // "for...of" für async/await
+        if (data.items?.length > 0) {
+            // Übersetzung nur für Al Jazeera & UN versuchen
+            const needsTranslation = (feedKey === 'aljazeera' || feedKey === 'un');
+            
+            for (const item of data.items) {
                 let title = item.title;
                 let description = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
 
-                // Übersetze Titel & Beschreibung bei Al Jazeera & UN
-                if (feedKey === 'aljazeera' || feedKey === 'un') {
-                    title = await translateText(title);
-                    description = await translateText(description);
+                // Übersetzung parallel anstoßen (nicht auf Ergebnis warten)
+                if (needsTranslation) {
+                    translateText(title).then(translated => {
+                        title = translated;
+                    }).catch(() => null); // Fehler ignorieren
+                    
+                    translateText(description).then(translated => {
+                        description = translated;
+                    }).catch(() => null);
                 }
 
                 feedHTML += `
@@ -66,12 +86,13 @@ async function loadFeed(feedKey, initialLoad = false) {
         
         document.getElementById("feed-content").innerHTML = feedHTML;
     } catch (error) {
-        console.error("Fehler:", error);
+        console.error("Feed-Lade-Fehler:", error);
         document.getElementById("feed-content").innerHTML = 
-            `<p class="error">Fehler beim Laden. Bitte später versuchen.</p>`;
+            `<p class="error">Fehler beim Laden. <button onclick="loadFeed('${feedKey}')">Erneut versuchen</button></p>`;
     }
 }
 
+// Initialer Aufruf
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.feed-selector button:first-child').classList.add('active');
     loadFeed('deutschlandfunk', true);
