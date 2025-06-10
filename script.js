@@ -6,14 +6,32 @@ const RSS_FEEDS = {
     multipolar: "https://multipolar-magazin.de/atom-artikel.xml"
 };
 
+// Übersetzungsfunktion (nutzt LibreTranslate)
+async function translateText(text, targetLang = 'de') {
+    try {
+        const response = await fetch('https://libretranslate.de/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                q: text,
+                source: 'en',
+                target: targetLang,
+                format: 'text'
+            })
+        });
+        const data = await response.json();
+        return data.translatedText || text; // Falls Fehler, Originaltext zurückgeben
+    } catch (error) {
+        console.error("Übersetzungsfehler:", error);
+        return text; // Fallback: Unübersetzter Text
+    }
+}
+
 async function loadFeed(feedKey, initialLoad = false) {
     if (!initialLoad) {
-        // Entferne aktive Klasse von allen Buttons
         document.querySelectorAll('.feed-selector button').forEach(btn => {
             btn.classList.remove('active');
         });
-        
-        // Füge aktive Klasse zum geklickten Button hinzu
         event.target.classList.add('active');
     }
     
@@ -24,32 +42,37 @@ async function loadFeed(feedKey, initialLoad = false) {
         
         let feedHTML = "";
         if (data.items && data.items.length > 0) {
-            data.items.forEach(item => {
-                const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
+            for (const item of data.items) { // "for...of" für async/await
+                let title = item.title;
+                let description = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
+
+                // Übersetze Titel & Beschreibung bei Al Jazeera & UN
+                if (feedKey === 'aljazeera' || feedKey === 'un') {
+                    title = await translateText(title);
+                    description = await translateText(description);
+                }
+
                 feedHTML += `
                     <div class="feed-item">
-                        <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
-                        <p>${cleanDescription}</p>
+                        <h3><a href="${item.link}" target="_blank">${title}</a></h3>
+                        <p>${description}</p>
                         <small>${new Date(item.pubDate).toLocaleString()}</small>
                     </div>
                 `;
-            });
+            }
         } else {
-            feedHTML = `<p class="no-articles">Keine Artikel gefunden. Bitte versuche es später erneut.</p>`;
+            feedHTML = `<p class="no-articles">Keine Artikel gefunden.</p>`;
         }
         
         document.getElementById("feed-content").innerHTML = feedHTML;
     } catch (error) {
-        console.error("Fehler beim Laden des Feeds:", error);
+        console.error("Fehler:", error);
         document.getElementById("feed-content").innerHTML = 
-            `<p class="error">Fehler beim Laden des Feeds. Bitte versuche es später erneut.</p>`;
+            `<p class="error">Fehler beim Laden. Bitte später versuchen.</p>`;
     }
 }
 
-// Standardmäßig ersten Feed laden und Button als aktiv markieren
-document.addEventListener('DOMContentLoaded', function() {
-    // Manuell den ersten Button als aktiv markieren
+document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.feed-selector button:first-child').classList.add('active');
-    // Feed mit initialLoad-Flag laden
     loadFeed('deutschlandfunk', true);
 });
