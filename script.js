@@ -3,7 +3,8 @@ const RSS_FEEDS = {
     jungewelt: "https://www.jungewelt.de/feeds/newsticker.rss",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     peoplesdispatch: "https://peoplesdispatch.org/feed/",
-    lemonde: "https://www.lemonde.fr/en/rss/une.xml"
+    lemonde: "https://www.lemonde.fr/en/rss/une.xml",
+    telesur: "https://www.telesurenglish.net/rss" // Neu
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
@@ -25,12 +26,14 @@ async function loadFeed(feedKey, initialLoad = false) {
         let feedHTML = "";
         if (data.items && data.items.length > 0) {
             data.items.forEach(item => {
-                const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
+                const cleanDescription = item.description 
+                    ? item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "..."
+                    : "Keine Beschreibung verfügbar."; // Fallback für fehlende Beschreibung
                 feedHTML += `
                     <div class="feed-item">
-                        <h3><a href="${item.link}" target="_blank">${item.title}</a></h3>
+                        <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
                         <p>${cleanDescription}</p>
-                        <small>${new Date(item.pubDate).toLocaleString()}</small>
+                        <small>${item.pubDate ? new Date(item.pubDate).toLocaleString() : "Datum unbekannt"}</small>
                     </div>
                 `;
             });
@@ -48,8 +51,6 @@ async function loadFeed(feedKey, initialLoad = false) {
 
 // Standardmäßig ersten Feed laden und Button als aktiv markieren
 document.addEventListener('DOMContentLoaded', function() {
-    // Manuell den ersten Button als aktiv markieren
     document.querySelector('.feed-selector button:first-child').classList.add('active');
-    // Feed mit initialLoad-Flag laden
     loadFeed('deutschlandfunk', true);
 });
