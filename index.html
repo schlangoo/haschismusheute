@@ -11,12 +11,12 @@
     <h1>★ Haschismus Heute ★</h1>
     <p class="greeting">Grüße Genosse, es gilt die Welt zu erobern!</p>
     <div class="feed-selector">
-        <button onclick="loadFeed('deutschlandfunk')">Deutschlandfunk</button>
-        <button onclick="loadFeed('jungewelt')">junge Welt</button>
-        <button onclick="loadFeed('aljazeera')">Al Jazeera (QA)</button>
-        <button onclick="loadFeed('peoplesdispatch')">Peoples Dispatch (IN)</button>
-        <button onclick="loadFeed('lemonde')">Le Monde (FR)</button>
-        <button onclick="loadFeed('telesur')">teleSUR (VE)</button> <!-- Neu -->
+        <button onclick="loadFeed('deutschlandfunk')" data-country="">Deutschlandfunk</button>
+        <button onclick="loadFeed('jungewelt')" data-country="">junge Welt</button>
+        <button onclick="loadFeed('aljazeera')" data-country="QA">Al Jazeera</button>
+        <button onclick="loadFeed('peoplesdispatch')" data-country="IN">Peoples Dispatch</button>
+        <button onclick="loadFeed('lemonde')" data-country="FR">Le Monde</button>
+        <button onclick="loadFeed('telesur')" data-country="VE">teleSUR</button>
     </div>
     <div id="feed-content"></div>
     <script src="script.js"></script>
