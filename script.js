@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     peoplesdispatch: "https://peoplesdispatch.org/feed/",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
-    telesur: "https://www.telesurenglish.net/rss"
+    telesur: "https://www.telesurenglish.net/news/"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
