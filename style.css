@@ -1,38 +1,194 @@
-/* [Alle bestehenden CSS-Regeln bleiben gleich, außer: ] */
+body {
+    font-family: 'Libre Baskerville', serif;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #f5f5f0;
+    color: #333;
+    line-height: 1.6;
+    background-image: linear-gradient(to bottom, rgba(245,245,240,0.8) 0%, rgba(245,245,240,0.8) 100%), url('https://www.transparenttextures.com/patterns/paper.png');
+}
 
-.feed-selector button {
-    padding: 8px 12px; /* Etwas kompakter */
+h1 {
+    color: #8B0000;
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8em;
+    margin: 20px 0 10px;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    border-bottom: 2px solid #8B0000;
+    padding-bottom: 10px;
+}
+
+.greeting {
+    text-align: center;
+    font-style: italic;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #555;
+}
+
+.feed-selector {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+button {
+    padding: 10px 15px;
+    background: #8B0000;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-family: 'Libre Baskerville', serif;
+    transition: all 0.3s;
     position: relative;
-    font-size: 0.9em; /* Basis-Schriftgröße */
 }
 
-/* Länderkürzel als kleine hochgestellte Schrift */
-.feed-selector button::after {
-    content: attr(data-country);
-    font-size: 0.65em;
+button:hover {
+    background: #600000;
+}
+
+button.active {
+    background: #600000;
+    font-weight: bold;
+}
+
+button.active::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #8B0000;
+}
+
+#feed-content {
+    background: white;
+    padding: 25px;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    background-image: linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) 100%), url('https://www.transparenttextures.com/patterns/cream-paper.png');
+}
+
+.feed-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.feed-item:last-child {
+    border-bottom: none;
+}
+
+.feed-item h3 {
+    margin: 0 0 10px 0;
+    color: #8B0000;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3em;
+}
+
+.feed-item a {
+    color: #8B0000;
+    text-decoration: none;
+}
+
+.feed-item a:hover {
+    text-decoration: underline;
+}
+
+.feed-item p {
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+.feed-item small {
+    color: #666;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.no-articles, .error {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 20px;
+}
+
+.error {
+    color: #8B0000;
+}
+
+/* NEU: Länderkürzel-Stil */
+.country-code {
+    font-size: 0.75em;
     opacity: 0.8;
-    margin-left: 4px;
-    vertical-align: super;
+    margin-left: 2px;
+    font-weight: normal;
 }
 
-/* Mobile Optimierungen (angepasst) */
+/* Mobile Optimierungen */
 @media (max-width: 768px) {
-    .feed-selector button {
-        padding: 6px 8px;
-        font-size: 0.85em;
+    body {
+        padding: 10px;
     }
-    .feed-selector button::after {
-        font-size: 0.6em;
+    
+    h1 {
+        font-size: 1.8em;
+        padding: 0 10px 10px;
+        line-height: 1.3;
+        letter-spacing: normal;
+    }
+    
+    .greeting {
+        font-size: 1em;
+        margin-bottom: 20px;
+    }
+    
+    .feed-selector {
+        gap: 6px;
+    }
+    
+    button {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+    
+    #feed-content {
+        padding: 15px;
+    }
+    
+    .feed-item h3 {
+        font-size: 1.1em;
     }
 }
 
 @media (max-width: 480px) {
-    .feed-selector {
-        flex-direction: row; /* Buttons bleiben in einer Zeile */
-        flex-wrap: wrap; /* Umbruch erlauben */
+    h1 {
+        font-size: 1.5em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
-    .feed-selector button {
-        width: auto; /* Nicht mehr 100% Breite */
-        flex-grow: 1; /* Gleichmäßige Verteilung */
+    
+    .feed-selector {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    button {
+        width: 100%;
+    }
+
+    /* Kürzel auf kleinen Displays ausblenden */
+    .country-code {
+        display: none;
     }
 }
