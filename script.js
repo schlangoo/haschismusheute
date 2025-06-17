@@ -4,17 +4,14 @@ const RSS_FEEDS = {
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     peoplesdispatch: "https://peoplesdispatch.org/feed/",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
-    telesur: "https://www.telesurenglish.net/rss" // Neu
+    telesur: "https://www.telesurenglish.net/rss"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
     if (!initialLoad) {
-        // Entferne aktive Klasse von allen Buttons
         document.querySelectorAll('.feed-selector button').forEach(btn => {
             btn.classList.remove('active');
         });
-        
-        // Füge aktive Klasse zum geklickten Button hinzu
         event.target.classList.add('active');
     }
     
@@ -26,14 +23,12 @@ async function loadFeed(feedKey, initialLoad = false) {
         let feedHTML = "";
         if (data.items && data.items.length > 0) {
             data.items.forEach(item => {
-                const cleanDescription = item.description 
-                    ? item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "..."
-                    : "Keine Beschreibung verfügbar."; // Fallback für fehlende Beschreibung
+                const cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 400) + "...";
                 feedHTML += `
                     <div class="feed-item">
                         <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${item.title}</a></h3>
                         <p>${cleanDescription}</p>
-                        <small>${item.pubDate ? new Date(item.pubDate).toLocaleString() : "Datum unbekannt"}</small>
+                        <small>${new Date(item.pubDate).toLocaleString()}</small>
                     </div>
                 `;
             });
@@ -49,7 +44,6 @@ async function loadFeed(feedKey, initialLoad = false) {
     }
 }
 
-// Standardmäßig ersten Feed laden und Button als aktiv markieren
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.feed-selector button:first-child').classList.add('active');
     loadFeed('deutschlandfunk', true);
