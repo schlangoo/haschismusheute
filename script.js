@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     peoplesdispatch: "https://peoplesdispatch.org/feed/",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
-    telesur: "https://cors-anywhere.herokuapp.com/https://www.telesurenglish.net/feed/"
+    meduza: "https://meduza.io/en/latest/news"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
