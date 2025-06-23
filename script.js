@@ -2,7 +2,7 @@ const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     jungewelt: "https://www.jungewelt.de/feeds/newsticker.rss",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
-    peoplesdispatch: "https://feeds.bbci.co.uk/news/rss.xml",
+    bbc: "https://feeds.bbci.co.uk/news/rss.xml",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
     meduza: "https://meduza.io/rss/en/all"
 };
