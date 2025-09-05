@@ -1,6 +1,6 @@
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
-    thecontinent: "https://continent.substack.com/feed",
+    africanews: "https://www.africanews.com/feed/rss",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     bbc: "https://feeds.bbci.co.uk/news/rss.xml",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
