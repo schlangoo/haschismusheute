@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     bbc: "https://feeds.bbci.co.uk/news/rss.xml",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
-    meduza: "https://www.cgtn.com/rss.html"
+    meduza: "https://www.jpost.com//rss/rssfeedsfrontpage.aspx"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
