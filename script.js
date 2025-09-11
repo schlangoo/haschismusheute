@@ -1,6 +1,6 @@
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
-    globaltimes: "http://www.xinhuanet.com/english/rss/",
+    globaltimes: "https://www.ecns.cn/rss/rss.xml",
     aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     bbc: "https://feeds.bbci.co.uk/news/rss.xml",
     lemonde: "https://www.lemonde.fr/en/rss/une.xml",
