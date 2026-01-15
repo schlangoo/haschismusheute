@@ -2,9 +2,9 @@ const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     untergrundblättle: "https://www.untergrund-blättle.ch/rss/aktuelle_artikel.rss",
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
-    bbc: "https://jacobin.de/rss.xml",
+    africanews: "//www.africanews.com/feed/rss",
     scmp: "https://www.scmp.com/rss/91/feed/",
-    jpost: "https://tass.com/rss/v2.xml"
+    tass: "https://tass.com/rss/v2.xml"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
