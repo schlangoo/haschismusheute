@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
     bbc: "https://jacobin.de/rss.xml",
     scmp: "https://www.scmp.com/rss/91/feed/",
-    jpost: "https://www.jpost.com//rss/rssfeedsfrontpage.aspx"
+    jpost: "https://tass.com/rss/v2.xml"
 };
 
 async function loadFeed(feedKey, initialLoad = false) {
