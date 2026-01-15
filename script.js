@@ -2,7 +2,7 @@ const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     untergrundblättle: "https://www.untergrund-blättle.ch/rss/aktuelle_artikel.rss",
     aljazeera: "https://www.aljazeera.com/news/",
-    bbc: "https://feeds.bbci.co.uk/news/rss.xml",
+    bbc: "https://www.telesurenglish.net/",
     lemonde: "https://www.scmp.com/rss/91/feed/",
     jpost: "https://www.jpost.com//rss/rssfeedsfrontpage.aspx"
 };
