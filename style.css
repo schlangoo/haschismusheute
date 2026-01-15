@@ -1,214 +1,106 @@
 body {
-    font-family: 'Georgia', 'Times New Roman', serif; /* Bessere Lesbarkeit als Libre Baskerville */
+    font-family: 'Georgia', serif;
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #0f0f0f;
-    color: #e8dfd0; /* Helleres, aber warmes Creme */
-    line-height: 1.7;
-    background: 
-        linear-gradient(rgba(15, 15, 15, 0.98), rgba(15, 15, 15, 0.98)),
-        url('https://www.transparenttextures.com/patterns/old-wall.png');
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* Schrift-Tuning: Georgia ist besser lesbar als Libre Baskerville */
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    font-weight: 700;
-    letter-spacing: 0.3px;
+    background: #0a0a0a;
+    color: #d0d0d0;
+    line-height: 1.6;
 }
 
 h1 {
-    color: #b22222; /* FEUERROT - kräftig aber vintage */
+    color: #b22222;
     text-align: center;
-    font-size: 2.8em;
-    margin: 20px 0 10px;
-    border-bottom: 3px solid rgba(178, 34, 34, 0.6); /* DICKER und kräftiger */
-    padding-bottom: 12px;
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.4);
+    font-size: 2.5em;
+    margin: 20px 0;
+    padding: 0;
 }
 
 .greeting {
     text-align: center;
-    font-style: italic;
+    color: #888;
     margin-bottom: 30px;
-    color: #b8a89a;
-    font-size: 1.1em;
-    line-height: 1.5;
+    font-style: italic;
 }
 
 .feed-selector {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 30px;
     flex-wrap: wrap;
     justify-content: center;
 }
 
 button {
-    padding: 12px 16px;
-    background: #2a1c1c; /* Dunkles Rotbraun */
-    color: #e8dfd0;
-    border: 1px solid #5a3a3a;
-    border-radius: 3px;
+    padding: 10px 15px;
+    background: #222;
+    color: #d0d0d0;
+    border: none;
+    border-radius: 2px;
     cursor: pointer;
-    font-family: 'Georgia', 'Times New Roman', serif;
-    transition: all 0.2s;
-    font-size: 1em;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+    font-family: 'Georgia', serif;
+    transition: background 0.2s;
 }
 
-button:hover {
-    background: #3a2c2c;
-    border-color: #7a4a4a;
-}
+button:hover { background: #333; }
 
 button.active {
-    background: #8b0000; /* KRÄFTIGES DUNKELROT */
-    color: #fff5e6;
+    background: #8b0000;
+    color: white;
     font-weight: bold;
-    border-color: #b22222;
-    box-shadow: 0 2px 6px rgba(178, 34, 34, 0.3);
 }
 
 #feed-content {
-    background: #1a1212; /* Rötlicher Unterton */
-    padding: 30px;
-    border-radius: 3px;
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.5);
-    border: 1px solid #4a3232; /* Rötlicher Rand */
-    line-height: 1.7;
-    background: 
-        linear-gradient(rgba(26, 18, 18, 0.95), rgba(26, 18, 18, 0.95)),
-        url('https://www.transparenttextures.com/patterns/paper.png');
+    background: #111;
+    padding: 0;
 }
 
 .feed-item {
-    margin-bottom: 28px;
-    padding-bottom: 28px;
-    border-bottom: 2px solid #4a3232; /* DICKER - auf Mobile sichtbar */
+    margin-bottom: 40px;
+    padding: 0;
 }
 
-.feed-item:last-child { border-bottom: none; }
-
 .feed-item h3 {
-    margin: 0 0 15px 0;
-    color: #d0a0a0; /* Rötliches Grau */
-    font-size: 1.5em; /* Etwas größer */
-    line-height: 1.4;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(178, 34, 34, 0.3); /* ROTE Unterstreichung */
+    margin: 0 0 8px 0;
+    color: #e0e0e0;
+    font-size: 1.3em;
     font-weight: 600;
 }
 
 .feed-item a {
-    color: #c44; /* KLARES ROT für Links */
+    color: #b22222;
     text-decoration: none;
-    font-weight: 500;
-    border-bottom: 1px solid rgba(204, 68, 68, 0.4); /* Sichtbare Linie */
-    transition: all 0.2s;
 }
 
-.feed-item a:hover {
-    color: #f55;
-    border-bottom: 2px solid #f55; /* DICKER beim Hover */
-}
+.feed-item a:hover { text-decoration: underline; }
 
 .feed-item p { 
-    color: #d8ccbc; /* Heller für besseren Kontrast */
-    margin-bottom: 15px;
-    font-size: 1.08em;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    color: #aaa; 
+    margin: 8px 0;
 }
 
 .feed-item small { 
-    color: #a89484; 
-    font-style: italic;
-    font-size: 0.95em;
+    color: #666; 
+    display: block;
+    margin-top: 5px;
 }
 
 .no-articles, .error {
     text-align: center;
-    color: #a89484;
-    font-style: italic;
-    padding: 30px;
-    font-size: 1.1em;
+    color: #666;
+    padding: 40px;
 }
 
 .error { color: #b22222; }
 
-/* Mobile: Extra dicke Linien für Sichtbarkeit */
 @media (max-width: 768px) {
-    body { 
-        padding: 15px;
-        font-size: 17px; /* Etwas größer auf Mobile */
-    }
-    
-    h1 {
-        font-size: 2.2em;
-        padding: 0 15px 15px;
-        line-height: 1.3;
-        border-bottom-width: 3px; /* Dick bleibt dick */
-    }
-    
-    .feed-item {
-        border-bottom-width: 3px; /* DICKER auf Mobile */
-        margin-bottom: 30px;
-        padding-bottom: 30px;
-    }
-    
-    .feed-item h3 {
-        font-size: 1.3em;
-        border-bottom-width: 2px; /* Dickere rote Linie */
-        padding-bottom: 10px;
-        margin-bottom: 18px;
-    }
-    
-    .feed-item a {
-        border-bottom-width: 2px; /* Sichtbarer auf Mobile */
-    }
-    
-    .greeting { 
-        margin-bottom: 25px;
-        font-size: 1.05em;
-    }
-    
-    button { 
-        padding: 12px 16px; /* Größere Touch-Targets */
-        font-size: 1em;
-    }
-    
-    #feed-content { 
-        padding: 22px;
-    }
+    body { padding: 15px; }
+    h1 { font-size: 2em; }
+    .feed-selector { gap: 8px; }
+    button { padding: 8px 12px; font-size: 0.9em; }
 }
 
 @media (max-width: 480px) {
-    h1 { 
-        font-size: 1.9em;
-        border-bottom-width: 3px;
-    }
-    
-    .feed-selector {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    button {
-        width: 100%;
-        text-align: center;
-        padding: 14px 16px;
-        font-size: 1.05em;
-    }
-    
-    .feed-item h3 {
-        font-size: 1.25em;
-        border-bottom-width: 2px;
-    }
-    
-    .feed-item {
-        border-bottom-width: 3px;
-    }
+    .feed-selector { flex-direction: column; }
+    button { width: 100%; text-align: left; }
 }
