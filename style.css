@@ -3,36 +3,50 @@ body {
     max-width: 800px;
     margin: 0 auto;
     padding: 20px;
-    background: #1a1a1a; /* Etwas heller als #121212 */
-    color: #d0d0d0; /* Etwas dunkleres Weiß = weniger grell */
-    line-height: 1.7; /* Mehr Zeilenabstand für bessere Lesbarkeit */
+    background: #0f0f0f; /* Sehr dunkel, aber nicht schwarz */
+    color: #c9c0b0; /* ALTES PAPIER - warmes, gedämpftes Beige/Grau */
+    line-height: 1.7;
     background: 
-        linear-gradient(rgba(26, 26, 26, 0.97), rgba(26, 26, 26, 0.97)),
-        url('https://www.transparenttextures.com/patterns/dark-wood.png');
-    -webkit-font-smoothing: antialiased; /* Bessere Kantenglättung */
+        linear-gradient(rgba(15, 15, 15, 0.98), rgba(15, 15, 15, 0.98)),
+        url('https://www.transparenttextures.com/patterns/old-wall.png'); /* Vintage-Textur */
+    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
+/* Leichter Sepia-Überlag für Vintage-Effekt */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(30, 20, 10, 0.03); /* Leichter Braunton-Overlay */
+    pointer-events: none;
+    z-index: -1;
+}
+
 h1 {
-    color: #a52a2a; /* Braun-Rot statt reines Rot - angenehmer */
+    color: #8b4513; /* SATTELBRAUN statt Rot - vintage, maoistisch */
     text-align: center;
     font-family: 'Playfair Display', serif;
     font-size: 2.8em;
     margin: 20px 0 10px;
-    text-shadow: none; /* Schatten entfernt für bessere Lesbarkeit */
-    border-bottom: 2px solid rgba(165, 42, 42, 0.3);
+    border-bottom: 2px solid rgba(139, 69, 19, 0.4);
     padding-bottom: 10px;
-    font-weight: 700; /* Fetter für besseren Kontrast */
-    letter-spacing: 0.5px; /* Leichte Buchstabenabstände */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .greeting {
     text-align: center;
     font-style: italic;
     margin-bottom: 30px;
-    color: #aaa;
+    color: #a89a8a; /* Gedämpftes Beige */
     font-size: 1.1em;
     line-height: 1.5;
+    opacity: 0.9;
 }
 
 .feed-selector {
@@ -44,93 +58,127 @@ h1 {
 }
 
 button {
-    padding: 12px 16px; /* Mehr Padding für bessere Klickfläche */
-    background: #2a2a2a; /* Dunkelgrau statt Rot */
-    color: #d0d0d0;
-    border: 1px solid #444;
-    border-radius: 4px; /* Leicht abgerundeter */
+    padding: 12px 16px;
+    background: #2a231c; /* Dunkles Erdbrown */
+    color: #c9c0b0;
+    border: 1px solid #4a3c2c;
+    border-radius: 3px;
     cursor: pointer;
     font-family: 'Libre Baskerville', serif;
     transition: all 0.2s;
     font-size: 1em;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 button:hover {
-    background: #333;
-    border-color: #666;
+    background: #3a2c1c;
+    border-color: #5d4a32;
+    transform: translateY(-1px);
 }
 
 button.active {
-    background: #8B0000; /* Nur aktiver Button hat Rot */
-    color: white;
+    background: #5d2e1c; /* Gebrannte Siena - vintage Rot/Braun */
+    color: #f0e6d6;
     font-weight: bold;
-    border-color: #8B0000;
+    border-color: #8b4513;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #feed-content {
-    background: #222; /* Etwas helleres Grau */
-    padding: 30px; /* Mehr Padding */
-    border-radius: 4px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
-    border: 1px solid #3a3a3a;
-    line-height: 1.7; /* Mehr Zeilenabstand im Content */
+    background: #1a1612; /* Dunkles Sepia */
+    padding: 30px;
+    border-radius: 3px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+    border: 1px solid #3a3229;
+    line-height: 1.7;
+    background: 
+        linear-gradient(rgba(26, 22, 18, 0.95), rgba(26, 22, 18, 0.95)),
+        url('https://www.transparenttextures.com/patterns/paper.png'); /* Papiereffekt */
+    position: relative;
+}
+
+/* Leichte Eckenabnutzung für Vintage-Look */
+#feed-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid rgba(139, 69, 19, 0.1);
+    border-radius: 3px;
+    pointer-events: none;
 }
 
 .feed-item {
-    margin-bottom: 25px; /* Mehr Abstand zwischen Artikeln */
+    margin-bottom: 25px;
     padding-bottom: 25px;
-    border-bottom: 1px solid #3a3a3a;
+    border-bottom: 1px solid #3a3229;
 }
 
 .feed-item:last-child { border-bottom: none; }
 
 .feed-item h3 {
     margin: 0 0 12px 0;
-    color: #d0d0d0; /* Hellgrau statt Rot für bessere Lesbarkeit */
+    color: #d0b090; /* Weiches Gold/Grau */
     font-family: 'Playfair Display', serif;
     font-size: 1.4em;
     font-weight: 600;
     line-height: 1.4;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .feed-item a {
-    color: #a52a2a; /* Braun-Rot für Links */
+    color: #b5651d; /* Kupfer */
     text-decoration: none;
     font-weight: 500;
+    border-bottom: 1px dotted rgba(181, 101, 29, 0.4);
+    transition: all 0.2s;
 }
 
 .feed-item a:hover {
-    color: #8B0000;
-    text-decoration: underline;
+    color: #d4873a;
+    border-bottom: 1px solid #d4873a;
 }
 
 .feed-item p { 
-    color: #bbb; /* Helleres Grau für bessere Lesbarkeit */
+    color: #b8ab9a; /* Warmes Grau/Beige */
     margin-bottom: 12px;
     font-size: 1.05em;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
 }
 
 .feed-item small { 
-    color: #888; 
+    color: #8a7c6a; 
     font-style: italic;
     font-size: 0.9em;
 }
 
 .no-articles, .error {
     text-align: center;
-    color: #888;
+    color: #8a7c6a;
     font-style: italic;
     padding: 30px;
     font-size: 1.1em;
 }
 
-.error { color: #a52a2a; }
+.error { color: #8b4513; }
 
-/* Bessere mobile Lesbarkeit */
+/* Leichter Korn-Effekt für Vintage-Foto-Look */
+@media screen and (min-width: 768px) {
+    body {
+        background-image: 
+            linear-gradient(rgba(15, 15, 15, 0.97), rgba(15, 15, 15, 0.97)),
+            url('https://www.transparenttextures.com/patterns/rice-paper.png'),
+            url('https://www.transparenttextures.com/patterns/noise.png'); /* Rauschen für Filmkorn */
+        background-blend-mode: overlay;
+    }
+}
+
 @media (max-width: 768px) {
     body { 
         padding: 15px;
-        font-size: 16px; /* Basisschriftgröße festlegen */
+        font-size: 16px;
     }
     
     h1 {
@@ -169,7 +217,7 @@ button.active {
     
     button {
         width: 100%;
-        text-align: center; /* Zentriert auf Mobile */
+        text-align: center;
         padding: 12px 15px;
         font-size: 1em;
     }
