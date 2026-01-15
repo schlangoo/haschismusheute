@@ -3,7 +3,7 @@ const RSS_FEEDS = {
     untergrundblättle: "https://www.untergrund-blättle.ch/rss/aktuelle_artikel.rss",
     aljazeera: "https://www.aljazeera.com/news/",
     bbc: "https://feeds.bbci.co.uk/news/rss.xml",
-    lemonde: "https://www.lemonde.fr/en/rss/une.xml",
+    lemonde: "https://www.scmp.com/rss/91/feed/",
     jpost: "https://www.jpost.com//rss/rssfeedsfrontpage.aspx"
 };
 
