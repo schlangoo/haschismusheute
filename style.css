@@ -6,8 +6,9 @@ body {
     background: #121212;
     color: #e0e0e0;
     line-height: 1.6;
-    background-image: linear-gradient(to bottom, rgba(18, 18, 18, 0.95) 0%, rgba(18, 18, 18, 0.95) 100%), 
-                      url('https://www.transparenttextures.com/patterns/dark-wood.png');
+    background: 
+        linear-gradient(rgba(18, 18, 18, 0.95), rgba(18, 18, 18, 0.95)),
+        url('https://www.transparenttextures.com/patterns/dark-wood.png');
 }
 
 h1 {
@@ -16,20 +17,13 @@ h1 {
     font-family: 'Playfair Display', serif;
     font-size: 2.8em;
     margin: 20px 0 10px;
-    letter-spacing: 1px;
-    text-shadow: 
-        0 0 5px #ff0000,
-        0 0 10px #ff0000,
-        0 0 15px #ff0000,
-        0 0 20px #ff3333;
+    text-shadow: 0 0 10px #ff0000, 0 0 20px #ff3333;
     border-bottom: 2px solid rgba(255, 0, 0, 0.3);
     padding-bottom: 10px;
     position: relative;
 }
 
-/* Rote Sterne wie Mao gemalt - links und rechts vom Titel */
-h1::before,
-h1::after {
+h1::before, h1::after {
     content: '★';
     position: absolute;
     top: 50%;
@@ -40,29 +34,17 @@ h1::after {
     animation: star-pulse 2s infinite alternate;
 }
 
-h1::before {
-    left: 10px;
-}
-
-h1::after {
-    right: 10px;
-}
+h1::before { left: 10px; }
+h1::after { right: 10px; }
 
 @keyframes star-pulse {
-    0% {
-        opacity: 0.7;
-        transform: translateY(-50%) scale(1);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(-50%) scale(1.2);
-    }
+    0% { opacity: 0.7; transform: translateY(-50%) scale(1); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1.2); }
 }
 
 .greeting {
     text-align: center;
     font-style: italic;
-    font-size: 1.2em;
     margin-bottom: 30px;
     color: #aaa;
 }
@@ -84,20 +66,12 @@ button {
     cursor: pointer;
     font-family: 'Libre Baskerville', serif;
     transition: all 0.3s;
-    position: relative;
-    white-space: nowrap;
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.2);
 }
 
-button:hover {
+button:hover, button.active {
     background: linear-gradient(135deg, #600000, #cc0000);
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
-}
-
-button.active {
-    background: linear-gradient(135deg, #600000, #cc0000);
-    font-weight: bold;
-    box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
 }
 
 button.active::after {
@@ -117,8 +91,9 @@ button.active::after {
     border-radius: 3px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     border: 1px solid #333;
-    background-image: linear-gradient(to bottom, rgba(30, 30, 30, 0.9) 0%, rgba(30, 30, 30, 0.9) 100%), 
-                      url('https://www.transparenttextures.com/patterns/dark-matter.png');
+    background: 
+        linear-gradient(rgba(30, 30, 30, 0.9), rgba(30, 30, 30, 0.9)),
+        url('https://www.transparenttextures.com/patterns/dark-matter.png');
 }
 
 .feed-item {
@@ -127,22 +102,18 @@ button.active::after {
     border-bottom: 1px solid #333;
 }
 
-.feed-item:last-child {
-    border-bottom: none;
-}
+.feed-item:last-child { border-bottom: none; }
 
 .feed-item h3 {
     margin: 0 0 10px 0;
     color: #ff3333;
     font-family: 'Playfair Display', serif;
-    font-size: 1.3em;
     text-shadow: 0 0 5px rgba(255, 51, 51, 0.5);
 }
 
 .feed-item a {
     color: #ff6666;
     text-decoration: none;
-    transition: all 0.3s;
 }
 
 .feed-item a:hover {
@@ -150,17 +121,8 @@ button.active::after {
     text-shadow: 0 0 8px rgba(255, 0, 0, 0.5);
 }
 
-.feed-item p {
-    color: #ccc;
-    line-height: 1.6;
-    margin-bottom: 8px;
-}
-
-.feed-item small {
-    color: #888;
-    font-size: 0.85em;
-    font-style: italic;
-}
+.feed-item p { color: #ccc; margin-bottom: 8px; }
+.feed-item small { color: #888; font-style: italic; }
 
 .no-articles, .error {
     text-align: center;
@@ -169,70 +131,30 @@ button.active::after {
     padding: 20px;
 }
 
-.error {
-    color: #ff3333;
-    text-shadow: 0 0 5px rgba(255, 51, 51, 0.3);
-}
+.error { color: #ff3333; }
 
-.country-code {
-    font-size: 0.75em;
-    opacity: 0.8;
-    margin-left: 2px;
-    font-weight: normal;
-}
-
-/* Mobile Anpassungen für Dark Mode */
 @media (max-width: 768px) {
-    body {
-        padding: 10px;
-    }
+    body { padding: 10px; }
     
     h1 {
         font-size: 1.8em;
         padding: 0 10px 10px;
-        line-height: 1.3;
-        letter-spacing: normal;
     }
     
-    h1::before,
-    h1::after {
-        display: none; /* Sterne auf kleinen Bildschirmen ausblenden */
-    }
+    h1::before, h1::after { display: none; }
     
-    .greeting {
-        font-size: 1em;
-        margin-bottom: 20px;
-    }
+    .greeting { margin-bottom: 20px; }
     
-    .feed-selector {
-        gap: 6px;
-    }
+    button { padding: 8px 10px; font-size: 0.85em; }
     
-    button {
-        padding: 8px 10px;
-        font-size: 0.85em;
-    }
-    
-    #feed-content {
-        padding: 15px;
-    }
-    
-    .feed-item h3 {
-        font-size: 1.1em;
-    }
+    #feed-content { padding: 15px; }
 }
 
 @media (max-width: 480px) {
-    h1 {
-        font-size: 1.5em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
+    h1 { font-size: 1.5em; }
     
     .feed-selector {
         flex-direction: column;
-        align-items: stretch;
         gap: 6px;
     }
     
@@ -240,10 +162,5 @@ button.active::after {
         width: 100%;
         text-align: left;
         padding: 10px 15px;
-    }
-    
-    .country-code {
-        float: right;
-        margin-right: 5px;
     }
 }
