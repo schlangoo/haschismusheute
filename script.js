@@ -1,6 +1,6 @@
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
-    untergrundblättle: "https://www.untergrund-blättle.ch/rss/aktuelle_artikel.rss",
+    untergrundblättle: "https://raptastisch.net/",
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
     africanews: "https://www.africanews.com/feed/rss",
     scmp: "https://www.scmp.com/rss/91/feed/",
