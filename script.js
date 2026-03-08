@@ -7,12 +7,12 @@ const RSS_FEEDS = {
     tass: "https://tass.com/rss/v2.xml"
 };
 
-async function loadFeed(feedKey, initialLoad = false) {
-    if (!initialLoad) {
+async function loadFeed(feedKey, initialLoad = false, clickedElement = null) {
+    if (!initialLoad && clickedElement) {
         document.querySelectorAll('.feed-selector button').forEach(btn => {
             btn.classList.remove('active');
         });
-        event.target.classList.add('active');
+        clickedElement.classList.add('active');
     }
     
     const feedUrl = RSS_FEEDS[feedKey];
@@ -45,6 +45,9 @@ async function loadFeed(feedKey, initialLoad = false) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelector('.feed-selector button:first-child').classList.add('active');
-    loadFeed('deutschlandfunk', true);
+    const firstButton = document.querySelector('.feed-selector button:first-child');
+    if (firstButton) {
+        firstButton.classList.add('active');
+        loadFeed('deutschlandfunk', true, firstButton);
+    }
 });
