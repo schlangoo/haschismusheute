@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
     africanews: "https://www.africanews.com/feed/rss",
     scmp: "https://www.scmp.com/rss/91/feed/",
-    tass: "https://www.phaseofthemoontoday.com/rss.xml"
+    tass: "https://www.mondkalender-online.de/rss-feed/rss_heute.php"
 };
 
 async function loadFeed(feedKey, initialLoad = false, clickedElement = null) {
