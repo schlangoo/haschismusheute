@@ -4,7 +4,7 @@ const RSS_FEEDS = {
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
     africanews: "https://www.africanews.com/feed/rss",
     scmp: "https://www.scmp.com/rss/91/feed/",
-    tass: "https://www.tasnimnews.ir/en/rss/feed/0/0/0/0/AllStories"
+    tasnim: "https://www.tasnimnews.ir/en/rss/feed/0/0/0/0/AllStories"
 };
 
 async function loadFeed(feedKey, initialLoad = false, clickedElement = null) {
