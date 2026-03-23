@@ -2,7 +2,7 @@ const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     elpais: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
-    africanews: "https://www.trumpstruth.org/",
+    trumpino: "https://www.trumpstruth.org/feed",
     scmp: "https://www.scmp.com/rss/91/feed/",
     tasnim: "https://www.tasnimnews.ir/en/rss/feed/0/0/0/0/AllStories"
 };
