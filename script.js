@@ -1,6 +1,6 @@
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
-    elpais: "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
+    tass: "https://tass.com/rss/v2.xml",
     aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
     trumpino: "https://www.trumpstruth.org/feed",
     scmp: "https://www.scmp.com/rss/91/feed/",
