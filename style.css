@@ -69,8 +69,8 @@ button.active .red-star {
 }
 
 .feed-item {
-    margin-bottom: 28px;
-    padding-bottom: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #eaeaea;
 }
 
@@ -81,7 +81,7 @@ button.active .red-star {
 }
 
 .feed-item h3 {
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     font-size: 1.15rem;
     font-weight: 500;
 }
@@ -102,7 +102,7 @@ button.active .red-star {
 
 .feed-item p {
     color: #444;
-    margin: 6px 0;
+    margin: 4px 0;
     font-size: 0.85rem;
     line-height: 1.45;
 }
@@ -110,13 +110,13 @@ button.active .red-star {
 .feed-item small {
     color: #999;
     display: block;
-    margin-top: 6px;
+    margin-top: 4px;
     font-size: 0.7rem;
 }
 
 .comment-section {
-    margin-top: 10px;
-    padding-top: 8px;
+    margin-top: 6px;
+    padding-top: 0;
     display: flex;
     align-items: flex-start;
     gap: 8px;
@@ -125,7 +125,7 @@ button.active .red-star {
 
 .comment-input {
     flex: 1;
-    padding: 8px 0;
+    padding: 6px 0;
     background: transparent;
     color: #111;
     border: none;
