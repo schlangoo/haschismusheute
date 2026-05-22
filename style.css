@@ -69,8 +69,8 @@ button.active .red-star {
 }
 
 .feed-item {
-    margin-bottom: 32px;
-    padding-bottom: 32px;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
     border-bottom: 1px solid #eaeaea;
 }
 
@@ -81,8 +81,8 @@ button.active .red-star {
 }
 
 .feed-item h3 {
-    margin: 0 0 8px 0;
-    font-size: 1.2rem;
+    margin: 0 0 6px 0;
+    font-size: 1.15rem;
     font-weight: 500;
 }
 
@@ -102,35 +102,39 @@ button.active .red-star {
 
 .feed-item p {
     color: #444;
-    margin: 8px 0;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    margin: 6px 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
 }
 
 .feed-item small {
     color: #999;
     display: block;
-    margin-top: 8px;
+    margin-top: 6px;
     font-size: 0.7rem;
 }
 
 .comment-section {
-    margin-top: 16px;
-    padding-top: 12px;
+    margin-top: 10px;
+    padding-top: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .comment-input {
-    width: 100%;
-    padding: 10px 0;
+    flex: 1;
+    padding: 8px 0;
     background: transparent;
     color: #111;
     border: none;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #e0e0e0;
     font-family: inherit;
-    font-size: 0.85rem;
-    margin-bottom: 10px;
+    font-size: 0.8rem;
     resize: vertical;
     box-sizing: border-box;
+    min-width: 150px;
 }
 
 .comment-input:focus {
@@ -140,7 +144,7 @@ button.active .red-star {
 
 .comment-input::placeholder {
     color: #bbb;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
 }
 
 .save-comment-btn {
@@ -148,7 +152,8 @@ button.active .red-star {
     border: 1px solid #ccc;
     color: #333;
     padding: 4px 12px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
+    white-space: nowrap;
 }
 
 .save-comment-btn:hover {
@@ -159,27 +164,25 @@ button.active .red-star {
 .comments-collection {
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
 }
 
 .commented-article {
     background: #fafafa;
-    padding: 20px;
+    padding: 16px 18px;
     border-radius: 8px;
     border: 1px solid #eaeaea;
 }
 
 .comment-text {
-    margin-bottom: 12px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 8px;
 }
 
 .comment-text p {
     margin: 0 0 6px 0;
     color: #111;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 0.9rem;
+    line-height: 1.45;
 }
 
 .comment-text p s {
@@ -189,7 +192,7 @@ button.active .red-star {
 .comment-meta {
     display: flex;
     align-items: baseline;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
     font-size: 0.7rem;
     color: #999;
@@ -200,14 +203,18 @@ button.active .red-star {
     font-style: italic;
 }
 
+.article-title-link {
+    font-weight: 500;
+    color: #333;
+}
+
 .comment-link {
-    margin-top: 8px;
-    padding-top: 8px;
-    font-size: 0.75rem;
+    margin: 6px 0 8px 0;
+    font-size: 0.7rem;
 }
 
 .comment-link a {
-    color: #555;
+    color: #777;
     text-decoration: none;
     border-bottom: 1px solid #ddd;
     word-break: break-all;
@@ -218,17 +225,13 @@ button.active .red-star {
     border-bottom-color: #aaa;
 }
 
-.article-title-link {
-    font-weight: 500;
-}
-
 .delete-comment-btn {
     background: transparent;
     border: 1px solid #e0e0e0;
     color: #999;
     font-size: 0.65rem;
-    padding: 3px 10px;
-    margin-top: 8px;
+    padding: 2px 8px;
+    margin-top: 6px;
     cursor: pointer;
 }
 
@@ -240,14 +243,14 @@ button.active .red-star {
 
 .empty-comments {
     text-align: center;
-    padding: 60px 20px;
+    padding: 50px 20px;
     background: #fafafa;
     border-radius: 8px;
     border: 1px solid #eaeaea;
 }
 
 .empty-comments p {
-    margin: 10px 0;
+    margin: 8px 0;
     font-size: 0.85rem;
     color: #666;
 }
@@ -277,7 +280,16 @@ button.active .red-star {
         font-size: 0.75rem;
     }
     
-    .comment-meta {
-        font-size: 0.65rem;
+    .comment-section {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .comment-input {
+        width: 100%;
+    }
+    
+    .save-comment-btn {
+        align-self: flex-end;
     }
 }
