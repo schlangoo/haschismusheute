@@ -32,12 +32,18 @@ function saveComment(articleId, title, link, summary, date) {
     const commentText = textarea ? textarea.value.trim() : "";
     
     console.log("Speichere Kommentar für:", title);
-    console.log("Artikel ID:", articleId);
     console.log("Kommentar:", commentText);
+    console.log("Article ID:", articleId);
     
     if (!commentText) {
         alert("Bitte schreib etwas in dein Haschismus-Kommentarfeld!");
         return false;
+    }
+    
+    // Fallback-Datum wenn keins vorhanden
+    let displayDate = date;
+    if (!displayDate || displayDate === "Invalid Date" || displayDate === "undefined") {
+        displayDate = new Date().toISOString();
     }
     
     // Prüfen ob Artikel schon kommentiert wurde
@@ -50,15 +56,17 @@ function saveComment(articleId, title, link, summary, date) {
     };
     
     if (existingIndex !== -1) {
+        // Kommentar zum bestehenden Artikel hinzufügen
         savedComments[existingIndex].comments.push(commentEntry);
         console.log("Kommentar zu bestehendem Artikel hinzugefügt");
     } else {
+        // Neuen Artikel anlegen
         savedComments.push({
             id: articleId,
             title: title,
             link: link,
             summary: summary,
-            originalDate: date,
+            originalDate: displayDate,
             comments: [commentEntry]
         });
         console.log("Neuer Artikel mit Kommentar angelegt");
@@ -79,11 +87,12 @@ function deleteComment(articleId, commentId) {
     if (article) {
         article.comments = article.comments.filter(c => c.id !== commentId);
         if (article.comments.length === 0) {
+            // Artikel komplett entfernen wenn keine Kommentare mehr
             const index = savedComments.findIndex(a => a.id === articleId);
             if (index !== -1) savedComments.splice(index, 1);
         }
         saveComments();
-        showCommentedNews();
+        showCommentedNews(); // Ansicht aktualisieren
     }
 }
 
@@ -95,13 +104,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Sicherer String für onclick (entfernt Probleme mit Anführungszeichen)
-function makeSafeForOnclick(str) {
-    if (!str) return '';
-    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
-}
-
-// Normalen Feed laden
+// Normalen Feed laden (mit Kommentarfeld unter jedem Artikel)
 async function loadFeed(feedKey, clickedButton) {
     // Aktiven Button markieren
     document.querySelectorAll('.feed-selector button').forEach(btn => {
@@ -126,26 +129,42 @@ async function loadFeed(feedKey, clickedButton) {
         
         let feedHTML = "";
         data.items.forEach((item, index) => {
-            const cleanDescription = item.description ? item.description.replace(/<[^>]*>/g, "").substring(0, 300) + "..." : "Keine Beschreibung.";
-            // Eindeutige ID pro Artikel
-            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 5);
+            // Bereinige die Beschreibung sicher
+            let cleanDescription = "Keine Beschreibung verfügbar.";
+            if (item.description) {
+                cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
+                if (cleanDescription.length > 0) cleanDescription += "...";
+            }
             
-            // Daten für den onclick sicher machen
-            const safeTitle = makeSafeForOnclick(item.title);
-            const safeLink = makeSafeForOnclick(item.link);
-            const safeSummary = makeSafeForOnclick(cleanDescription);
-            const safeDate = makeSafeForOnclick(item.pubDate);
+            // Sichere Behandlung des Datums
+            let pubDate = item.pubDate;
+            let formattedDate = "Datum unbekannt";
+            if (pubDate) {
+                try {
+                    formattedDate = new Date(pubDate).toLocaleString();
+                    if (formattedDate === "Invalid Date") formattedDate = "Datum unbekannt";
+                } catch(e) {
+                    formattedDate = "Datum unbekannt";
+                }
+            }
+            
+            // Eindeutige ID pro Artikel
+            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 6);
+            const escapedTitle = escapeHtml(item.title);
+            const escapedLink = escapeHtml(item.link);
+            const escapedSummary = escapeHtml(cleanDescription);
+            const escapedDate = escapeHtml(pubDate || "");
             
             feedHTML += `
-                <div class="feed-item">
-                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
+                <div class="feed-item" data-article-id="${articleId}">
+                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapedTitle}</a></h3>
                     <p>${cleanDescription}</p>
-                    <small>📅 ${new Date(item.pubDate).toLocaleString()}</small>
+                    <small>📅 ${formattedDate}</small>
                     
                     <div class="comment-section">
                         <label>💬 Haschismus-Kommentar:</label>
                         <textarea id="comment-${articleId}" class="comment-input" placeholder="Deine Gedanken zum Haschismus... (max. 300 Zeichen)" maxlength="300" rows="2"></textarea>
-                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${safeTitle}', '${safeLink}', '${safeSummary}', '${safeDate}')">
+                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${escapedTitle.replace(/'/g, "\\'")}', '${escapedLink.replace(/'/g, "\\'")}', '${escapedSummary.replace(/'/g, "\\'")}', '${escapedDate.replace(/'/g, "\\'")}')">
                             💾 Haschismus-Gedanke speichern
                         </button>
                     </div>
@@ -156,13 +175,13 @@ async function loadFeed(feedKey, clickedButton) {
         document.getElementById("feed-content").innerHTML = feedHTML;
     } catch (error) {
         console.error("Fehler:", error);
-        document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden des Feeds.</p>`;
+        document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden des Feeds: ${error.message}</p>`;
     }
 }
 
-// "Haschismus Heute" anzeigen
+// "Haschismus Heute" anzeigen – alle kommentierten Artikel mit deinen Gedanken
 function showCommentedNews() {
-    loadSavedComments();
+    loadSavedComments(); // Neu laden um sicherzustellen dass alles aktuell ist
     
     if (savedComments.length === 0) {
         document.getElementById("feed-content").innerHTML = `
@@ -170,8 +189,11 @@ function showCommentedNews() {
                 <p>🌟 Noch keine Haschismus-Gedanken gespeichert.</p>
                 <p>👉 Klicke auf einen News-Feed (z.B. Deutschlandfunk) und hinterlasse unter einem Artikel deinen Kommentar.</p>
                 <p>💾 Der Artikel + dein Kommentar landen dann hier!</p>
+                <hr>
+                <p><small>💡 Tipp: Probiere zuerst TASS, Al Jazeera oder IRNA – die funktionieren am besten!</small></p>
             </div>
         `;
+        // Button aktivieren
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
         const haschismusBtn = document.getElementById('haschismus-btn');
         if (haschismusBtn) haschismusBtn.classList.add('active');
@@ -180,23 +202,35 @@ function showCommentedNews() {
     
     let html = `<div class="haschismus-collection">`;
     
-    // Neueste zuerst
+    // Neueste zuerst (mit reverse)
     [...savedComments].reverse().forEach(article => {
+        // Datum sicher formatieren
+        let displayDate = "Datum unbekannt";
+        if (article.originalDate && article.originalDate !== "undefined") {
+            try {
+                displayDate = new Date(article.originalDate).toLocaleString();
+                if (displayDate === "Invalid Date") displayDate = "Datum unbekannt";
+            } catch(e) {
+                displayDate = "Datum unbekannt";
+            }
+        }
+        
         html += `
             <div class="commented-article">
                 <h3><a href="${escapeHtml(article.link)}" target="_blank">${escapeHtml(article.title)}</a></h3>
                 <p class="original-summary">📰 ${escapeHtml(article.summary)}</p>
-                <small class="original-date">🗓️ Original: ${new Date(article.originalDate).toLocaleString()}</small>
+                <small class="original-date">🗓️ Original: ${displayDate}</small>
                 
                 <div class="my-comments">
                     <h4>💭 Meine Haschismus-Gedanken:</h4>
         `;
         
         article.comments.forEach(comment => {
+            const commentDate = new Date(comment.date).toLocaleString();
             html += `
                 <div class="comment-box">
                     <p>✍️ ${escapeHtml(comment.text)}</p>
-                    <small>📝 ${new Date(comment.date).toLocaleString()}</small>
+                    <small>📝 ${commentDate}</small>
                     <button class="delete-comment-btn" onclick="deleteComment('${article.id}', ${comment.id})">🗑️ Löschen</button>
                 </div>
             `;
@@ -211,15 +245,24 @@ function showCommentedNews() {
     html += `</div>`;
     document.getElementById("feed-content").innerHTML = html;
     
+    // Button aktivieren
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
     const haschismusBtn = document.getElementById('haschismus-btn');
     if (haschismusBtn) haschismusBtn.classList.add('active');
+}
+
+// Debug-Funktion
+function showDebugInfo() {
+    console.log("=== DEBUG INFO ===");
+    console.log("Gespeicherte Kommentare:", savedComments);
+    console.log("LocalStorage:", localStorage.getItem('haschismus_comments'));
 }
 
 // Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Seite geladen, initialisiere...");
     loadSavedComments();
+    // Standardmäßig Deutschlandfunk laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
