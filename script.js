@@ -166,7 +166,7 @@ async function loadFeed(feedKey, clickedButton) {
         data.items.forEach((item, index) => {
             let cleanDescription = "";
             if (item.description && item.description !== "undefined") {
-                cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
+                cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 280);
                 if (cleanDescription.length > 0) cleanDescription += "...";
             }
             
@@ -202,7 +202,7 @@ async function loadFeed(feedKey, clickedButton) {
                     <small>${escapeHtml(formattedDate)}</small>
                     
                     <div class="comment-section">
-                        <textarea id="comment-${articleId}" class="comment-input" placeholder="Kommentar" maxlength="300" rows="2"></textarea>
+                        <textarea id="comment-${articleId}" class="comment-input" placeholder="Kommentar" maxlength="300" rows="1"></textarea>
                         <button class="save-comment-btn" onclick="saveComment('${articleId}')">Speichern</button>
                     </div>
                 </div>
@@ -234,7 +234,6 @@ function showCommentedNews() {
     
     let html = `<div class="comments-collection">`;
     
-    // Sammle alle Kommentare einzeln und sortiere sie nach Datum (neueste zuerst)
     let allComments = [];
     savedComments.forEach(article => {
         article.comments.forEach(comment => {
@@ -249,7 +248,6 @@ function showCommentedNews() {
         });
     });
     
-    // Sortieren nach Datum, neueste zuerst
     allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
     
     allComments.forEach(comment => {
@@ -269,7 +267,7 @@ function showCommentedNews() {
                 <div class="comment-link">
                     <a href="${escapeHtml(comment.articleLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(comment.articleLink)}</a>
                 </div>
-                <div class="comment-meta" style="margin-top: 8px; justify-content: space-between;">
+                <div class="comment-meta" style="margin-top: 6px; justify-content: space-between;">
                     <small>${escapeHtml(commentDate)}</small>
                     <button class="delete-comment-btn" onclick="deleteComment('${comment.articleId}', ${comment.id})">Löschen</button>
                 </div>
