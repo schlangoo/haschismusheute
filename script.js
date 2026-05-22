@@ -15,17 +15,26 @@ function loadSavedComments() {
     const saved = localStorage.getItem('haschismus_comments');
     if (saved) {
         savedComments = JSON.parse(saved);
+        console.log("Geladene Kommentare:", savedComments.length);
     }
 }
 
 // Speichere Kommentare in localStorage
 function saveComments() {
     localStorage.setItem('haschismus_comments', JSON.stringify(savedComments));
+    console.log("Gespeichert:", savedComments.length);
 }
 
-// Kommentar zu einem Artikel speichern
-function saveComment(articleId, title, link, summary, date, commentText) {
-    if (!commentText.trim()) {
+// Kommentar zu einem Artikel speichern (verbesserte Version)
+function saveComment(articleId, title, link, summary, date) {
+    // Textfeld direkt aus dem DOM holen
+    const textarea = document.getElementById(`comment-${articleId}`);
+    const commentText = textarea ? textarea.value.trim() : "";
+    
+    console.log("Speichere Kommentar für:", title);
+    console.log("Kommentar:", commentText);
+    
+    if (!commentText) {
         alert("Bitte schreib etwas in dein Haschismus-Kommentarfeld!");
         return false;
     }
@@ -42,6 +51,7 @@ function saveComment(articleId, title, link, summary, date, commentText) {
     if (existingIndex !== -1) {
         // Kommentar zum bestehenden Artikel hinzufügen
         savedComments[existingIndex].comments.push(commentEntry);
+        console.log("Kommentar zu bestehendem Artikel hinzugefügt");
     } else {
         // Neuen Artikel anlegen
         savedComments.push({
@@ -52,13 +62,13 @@ function saveComment(articleId, title, link, summary, date, commentText) {
             originalDate: date,
             comments: [commentEntry]
         });
+        console.log("Neuer Artikel mit Kommentar angelegt");
     }
     
     saveComments();
     alert("💾 Haschismus-Gedanke gespeichert! → Unter 'Haschismus Heute' ansehen.");
     
     // Textfeld leeren
-    const textarea = document.getElementById(`comment-${articleId}`);
     if (textarea) textarea.value = "";
     
     return true;
@@ -111,9 +121,10 @@ async function loadFeed(feedKey, clickedButton) {
         }
         
         let feedHTML = "";
-        data.items.forEach(item => {
+        data.items.forEach((item, index) => {
             const cleanDescription = item.description ? item.description.replace(/<[^>]*>/g, "").substring(0, 300) + "..." : "Keine Beschreibung.";
-            const articleId = "art_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8);
+            // Eindeutige ID pro Artikel (basierend auf Link + Index)
+            const articleId = "art_" + btoa(item.link).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20) + "_" + index;
             const escapedTitle = escapeHtml(item.title);
             const escapedLink = escapeHtml(item.link);
             const escapedSummary = escapeHtml(cleanDescription);
@@ -128,7 +139,7 @@ async function loadFeed(feedKey, clickedButton) {
                     <div class="comment-section">
                         <label>💬 Haschismus-Kommentar:</label>
                         <textarea id="comment-${articleId}" class="comment-input" placeholder="Deine Gedanken zum Haschismus... (max. 300 Zeichen)" maxlength="300" rows="2"></textarea>
-                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${escapedTitle.replace(/'/g, "\\'")}', '${escapedLink.replace(/'/g, "\\'")}', '${escapedSummary.replace(/'/g, "\\'")}', '${escapedDate.replace(/'/g, "\\'")}', document.getElementById('comment-${articleId}').value)">
+                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${escapedTitle.replace(/'/g, "\\'")}', '${escapedLink.replace(/'/g, "\\'")}', '${escapedSummary.replace(/'/g, "\\'")}', '${escapedDate.replace(/'/g, "\\'")}')">
                             💾 Haschismus-Gedanke speichern
                         </button>
                     </div>
@@ -145,6 +156,8 @@ async function loadFeed(feedKey, clickedButton) {
 
 // "Haschismus Heute" anzeigen – alle kommentierten Artikel mit deinen Gedanken
 function showCommentedNews() {
+    loadSavedComments(); // Neu laden um sicherzustellen dass alles aktuell ist
+    
     if (savedComments.length === 0) {
         document.getElementById("feed-content").innerHTML = `
             <div class="empty-haschismus">
@@ -162,7 +175,7 @@ function showCommentedNews() {
     
     let html = `<div class="haschismus-collection">`;
     
-    // Neueste zuerst
+    // Neueste zuerst (mit reverse)
     [...savedComments].reverse().forEach(article => {
         html += `
             <div class="commented-article">
@@ -199,8 +212,15 @@ function showCommentedNews() {
     if (haschismusBtn) haschismusBtn.classList.add('active');
 }
 
+// Test-Funktion für Debugging (in Konsole aufrufbar)
+function testSave() {
+    console.log("Test-Save Funktion");
+    console.log("Aktuelle savedComments:", savedComments);
+}
+
 // Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Seite geladen, initialisiere...");
     loadSavedComments();
     // Standardmäßig Deutschlandfunk laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
