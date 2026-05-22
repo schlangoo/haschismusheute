@@ -9,6 +9,11 @@ const RSS_FEEDS = {
 
 let savedComments = [];
 
+function formatStrikethrough(text) {
+    if (!text) return '';
+    return text.replace(/--(.*?)--/g, '<s>$1</s>');
+}
+
 function loadSavedComments() {
     const saved = localStorage.getItem('comments');
     if (saved) {
@@ -92,7 +97,9 @@ function saveComment(articleId) {
     const commentEntry = {
         id: Date.now(),
         text: commentText,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
+        articleTitle: title,
+        articleLink: link
     };
     
     if (existingIndex !== -1) {
@@ -109,7 +116,7 @@ function saveComment(articleId) {
     }
     
     saveComments();
-    alert("Gespeichert.");
+    alert("Kommentar gespeichert.");
     textarea.value = "";
     return true;
 }
@@ -173,9 +180,11 @@ async function loadFeed(feedKey, clickedButton) {
                 } catch(e) {}
             }
             
-            const title = item.title || "Unbekannter Titel";
+            let title = item.title || "Unbekannter Titel";
             const link = item.link || "#";
             const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
+            
+            const formattedTitle = formatStrikethrough(escapeHtml(title));
             
             const safeTitle = safeBase64Encode(title);
             const safeLink = safeBase64Encode(link);
@@ -188,7 +197,7 @@ async function loadFeed(feedKey, clickedButton) {
                      data-link="${safeLink}" 
                      data-summary="${safeSummary}" 
                      data-date="${safeDate}">
-                    <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${escapeHtml(title)}</a></h3>
+                    <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${formattedTitle}</a></h3>
                     <p>${escapeHtml(cleanDescription)}</p>
                     <small>${escapeHtml(formattedDate)}</small>
                     
@@ -212,64 +221,81 @@ function showCommentedNews() {
     
     if (savedComments.length === 0) {
         document.getElementById("feed-content").innerHTML = `
-            <div class="empty-haschismus">
-                <p>Keine gespeicherten Kommentare.</p>
+            <div class="empty-comments">
+                <p>Keine Kommentare gespeichert.</p>
                 <p>Wähle einen Feed und schreibe etwas.</p>
             </div>
         `;
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-        const notesBtn = document.getElementById('haschismus-btn');
-        if (notesBtn) notesBtn.classList.add('active');
+        const commentsBtn = document.getElementById('comments-btn');
+        if (commentsBtn) commentsBtn.classList.add('active');
         return;
     }
     
-    let html = `<div class="haschismus-collection">`;
+    let html = `<div class="comments-collection">`;
     
-    [...savedComments].reverse().forEach(article => {
-        let displayDate = "";
-        if (article.originalDate && article.originalDate !== "undefined" && article.originalDate !== "") {
-            try {
-                const dateObj = new Date(article.originalDate);
-                if (!isNaN(dateObj.getTime())) {
-                    displayDate = dateObj.toLocaleDateString();
-                }
-            } catch(e) {}
-        }
+    // Sammle alle Kommentare einzeln und sortiere sie nach Datum (neueste zuerst)
+    let allComments = [];
+    savedComments.forEach(article => {
+        article.comments.forEach(comment => {
+            allComments.push({
+                id: comment.id,
+                text: comment.text,
+                date: comment.date,
+                articleId: article.id,
+                articleTitle: article.title,
+                articleLink: article.link
+            });
+        });
+    });
+    
+    // Sortieren nach Datum, neueste zuerst
+    allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    allComments.forEach(comment => {
+        const commentDate = new Date(comment.date).toLocaleString();
+        const formattedComment = formatStrikethrough(escapeHtml(comment.text));
+        const formattedTitle = formatStrikethrough(escapeHtml(comment.articleTitle));
         
         html += `
-            <div class="commented-article">
-                <h3><a href="${escapeHtml(article.link)}" target="_blank">${escapeHtml(article.title)}</a></h3>
-                <p class="original-summary">${escapeHtml(article.summary)}</p>
-                <small class="original-date">${escapeHtml(displayDate)}</small>
-                
-                <div class="my-comments">
-                    <h4>Notizen</h4>
-        `;
-        
-        article.comments.forEach(comment => {
-            const commentDate = new Date(comment.date).toLocaleString();
-            html += `
-                <div class="comment-box">
-                    <p>${escapeHtml(comment.text)}</p>
-                    <small>${escapeHtml(commentDate)}</small>
-                    <button class="delete-comment-btn" onclick="deleteComment('${article.id}', ${comment.id})">Löschen</button>
+            <div class="commented-article" data-comment-id="${comment.id}" data-article-id="${comment.articleId}">
+                <div class="comment-text">
+                    <p>${formattedComment}</p>
+                    <div class="comment-meta">
+                        <span class="comment-to">zu</span>
+                        <span class="article-title-link">${formattedTitle}</span>
+                    </div>
                 </div>
-            `;
-        });
-        
-        html += `</div></div>`;
+                <div class="comment-link">
+                    <a href="${escapeHtml(comment.articleLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(comment.articleLink)}</a>
+                </div>
+                <div class="comment-meta" style="margin-top: 8px; justify-content: space-between;">
+                    <small>${escapeHtml(commentDate)}</small>
+                    <button class="delete-comment-btn" onclick="deleteComment('${comment.articleId}', ${comment.id})">Löschen</button>
+                </div>
+            </div>
+        `;
     });
     
     html += `</div>`;
     document.getElementById("feed-content").innerHTML = html;
     
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-    const notesBtn = document.getElementById('haschismus-btn');
-    if (notesBtn) notesBtn.classList.add('active');
+    const commentsBtn = document.getElementById('comments-btn');
+    if (commentsBtn) commentsBtn.classList.add('active');
+}
+
+function formatGreeting() {
+    const greetingElement = document.getElementById('greeting');
+    if (greetingElement) {
+        const originalText = greetingElement.innerHTML;
+        greetingElement.innerHTML = formatStrikethrough(escapeHtml(originalText));
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedComments();
+    formatGreeting();
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
