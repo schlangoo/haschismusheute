@@ -25,7 +25,7 @@ function saveComments() {
     console.log("Gespeichert:", savedComments.length);
 }
 
-// Kommentar zu einem Artikel speichern (NEUE Version ohne onclick-Probleme)
+// Kommentar zu einem Artikel speichern
 function saveComment(articleId) {
     console.log("saveComment aufgerufen für:", articleId);
     
@@ -33,7 +33,7 @@ function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
     const commentText = textarea ? textarea.value.trim() : "";
     
-    // Die Artikel-Daten aus data-Attributen holen
+    // Die Artikel-Daten aus data-Attributen holen (jetzt als JSON gespeichert)
     const articleDiv = document.getElementById(`article-${articleId}`);
     if (!articleDiv) {
         console.error("Article Div nicht gefunden");
@@ -41,10 +41,20 @@ function saveComment(articleId) {
         return false;
     }
     
-    const title = articleDiv.getAttribute('data-title') || "Unbekannter Titel";
-    const link = articleDiv.getAttribute('data-link') || "#";
-    const summary = articleDiv.getAttribute('data-summary') || "Keine Zusammenfassung";
-    const date = articleDiv.getAttribute('data-date') || new Date().toISOString();
+    // Daten aus data- Attributen holen (jetzt als JSON-String)
+    let articleData;
+    try {
+        articleData = JSON.parse(articleDiv.getAttribute('data-article') || '{}');
+    } catch(e) {
+        console.error("Fehler beim Parsen der Artikel-Daten:", e);
+        alert("Fehler: Artikel-Daten konnten nicht gelesen werden");
+        return false;
+    }
+    
+    const title = articleData.title || "Unbekannter Titel";
+    const link = articleData.link || "#";
+    const summary = articleData.summary || "Keine Zusammenfassung";
+    const date = articleData.date || new Date().toISOString();
     
     console.log("Titel:", title);
     console.log("Kommentar:", commentText);
@@ -52,12 +62,6 @@ function saveComment(articleId) {
     if (!commentText) {
         alert("Bitte schreib etwas in dein Haschismus-Kommentarfeld!");
         return false;
-    }
-    
-    // Fallback-Datum wenn keins vorhanden
-    let displayDate = date;
-    if (!displayDate || displayDate === "Invalid Date" || displayDate === "undefined") {
-        displayDate = new Date().toISOString();
     }
     
     // Prüfen ob Artikel schon kommentiert wurde
@@ -70,17 +74,15 @@ function saveComment(articleId) {
     };
     
     if (existingIndex !== -1) {
-        // Kommentar zum bestehenden Artikel hinzufügen
         savedComments[existingIndex].comments.push(commentEntry);
         console.log("Kommentar zu bestehendem Artikel hinzugefügt");
     } else {
-        // Neuen Artikel anlegen
         savedComments.push({
             id: articleId,
             title: title,
             link: link,
             summary: summary,
-            originalDate: displayDate,
+            originalDate: date,
             comments: [commentEntry]
         });
         console.log("Neuer Artikel mit Kommentar angelegt");
@@ -101,12 +103,11 @@ function deleteComment(articleId, commentId) {
     if (article) {
         article.comments = article.comments.filter(c => c.id !== commentId);
         if (article.comments.length === 0) {
-            // Artikel komplett entfernen wenn keine Kommentare mehr
             const index = savedComments.findIndex(a => a.id === articleId);
             if (index !== -1) savedComments.splice(index, 1);
         }
         saveComments();
-        showCommentedNews(); // Ansicht aktualisieren
+        showCommentedNews();
     }
 }
 
@@ -118,7 +119,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Normalen Feed laden (mit Kommentarfeld unter jedem Artikel)
+// Normalen Feed laden
 async function loadFeed(feedKey, clickedButton) {
     // Aktiven Button markieren
     document.querySelectorAll('.feed-selector button').forEach(btn => {
@@ -143,44 +144,41 @@ async function loadFeed(feedKey, clickedButton) {
         
         let feedHTML = "";
         data.items.forEach((item, index) => {
-            // Bereinige die Beschreibung sicher
+            // Beschreibung bereinigen
             let cleanDescription = "Keine Beschreibung verfügbar.";
             if (item.description) {
                 cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
-                if (cleanDescription.length > 0 && cleanDescription.length < 300) cleanDescription += "...";
-                if (cleanDescription.length === 300) cleanDescription += "...";
+                if (cleanDescription.length > 0) cleanDescription += "...";
             }
             
-            // Sichere Behandlung des Datums
-            let pubDate = item.pubDate;
+            // Datum formatieren
             let formattedDate = "Datum unbekannt";
-            if (pubDate) {
+            if (item.pubDate) {
                 try {
-                    formattedDate = new Date(pubDate).toLocaleString();
+                    formattedDate = new Date(item.pubDate).toLocaleString();
                     if (formattedDate === "Invalid Date") formattedDate = "Datum unbekannt";
                 } catch(e) {
                     formattedDate = "Datum unbekannt";
                 }
             }
             
-            // Eindeutige ID pro Artikel
+            // Eindeutige ID
             const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
             
-            // Daten für data-Attribute sicher kodieren (Base64 für Sonderzeichen)
-            const safeTitle = btoa(unescape(encodeURIComponent(item.title))); // Base64 für maximale Sicherheit
-            const safeLink = btoa(unescape(encodeURIComponent(item.link)));
-            const safeSummary = btoa(unescape(encodeURIComponent(cleanDescription)));
-            const safeDate = btoa(unescape(encodeURIComponent(pubDate || "")));
+            // Artikel-Daten als JSON für data-Attribut (sicher und einfach)
+            const articleData = {
+                title: item.title,
+                link: item.link,
+                summary: cleanDescription,
+                date: item.pubDate || new Date().toISOString()
+            };
+            const articleDataJson = JSON.stringify(articleData).replace(/"/g, '&quot;');
             
             feedHTML += `
-                <div class="feed-item" id="article-${articleId}" 
-                     data-title="${safeTitle}" 
-                     data-link="${safeLink}" 
-                     data-summary="${safeSummary}" 
-                     data-date="${safeDate}">
+                <div class="feed-item" id="article-${articleId}" data-article='${articleDataJson}'>
                     <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
-                    <p>${cleanDescription}</p>
-                    <small>📅 ${formattedDate}</small>
+                    <p>${escapeHtml(cleanDescription)}</p>
+                    <small>📅 ${escapeHtml(formattedDate)}</small>
                     
                     <div class="comment-section">
                         <label>💬 Haschismus-Kommentar:</label>
@@ -200,21 +198,18 @@ async function loadFeed(feedKey, clickedButton) {
     }
 }
 
-// "Haschismus Heute" anzeigen – alle kommentierten Artikel mit deinen Gedanken
+// "Haschismus Heute" anzeigen
 function showCommentedNews() {
-    loadSavedComments(); // Neu laden um sicherzustellen dass alles aktuell ist
+    loadSavedComments();
     
     if (savedComments.length === 0) {
         document.getElementById("feed-content").innerHTML = `
             <div class="empty-haschismus">
                 <p>🌟 Noch keine Haschismus-Gedanken gespeichert.</p>
-                <p>👉 Klicke auf einen News-Feed (z.B. Deutschlandfunk) und hinterlasse unter einem Artikel deinen Kommentar.</p>
+                <p>👉 Klicke auf einen News-Feed und hinterlasse unter einem Artikel deinen Kommentar.</p>
                 <p>💾 Der Artikel + dein Kommentar landen dann hier!</p>
-                <hr>
-                <p><small>💡 Tipp: Jeder Feed funktioniert jetzt! Auch Deutschlandfunk und SCMP.</small></p>
             </div>
         `;
-        // Button aktivieren
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
         const haschismusBtn = document.getElementById('haschismus-btn');
         if (haschismusBtn) haschismusBtn.classList.add('active');
@@ -223,9 +218,7 @@ function showCommentedNews() {
     
     let html = `<div class="haschismus-collection">`;
     
-    // Neueste zuerst (mit reverse)
     [...savedComments].reverse().forEach(article => {
-        // Datum sicher formatieren
         let displayDate = "Datum unbekannt";
         if (article.originalDate && article.originalDate !== "undefined") {
             try {
@@ -240,7 +233,7 @@ function showCommentedNews() {
             <div class="commented-article">
                 <h3><a href="${escapeHtml(article.link)}" target="_blank">${escapeHtml(article.title)}</a></h3>
                 <p class="original-summary">📰 ${escapeHtml(article.summary)}</p>
-                <small class="original-date">🗓️ Original: ${displayDate}</small>
+                <small class="original-date">🗓️ Original: ${escapeHtml(displayDate)}</small>
                 
                 <div class="my-comments">
                     <h4>💭 Meine Haschismus-Gedanken:</h4>
@@ -251,7 +244,7 @@ function showCommentedNews() {
             html += `
                 <div class="comment-box">
                     <p>✍️ ${escapeHtml(comment.text)}</p>
-                    <small>📝 ${commentDate}</small>
+                    <small>📝 ${escapeHtml(commentDate)}</small>
                     <button class="delete-comment-btn" onclick="deleteComment('${article.id}', ${comment.id})">🗑️ Löschen</button>
                 </div>
             `;
@@ -266,24 +259,15 @@ function showCommentedNews() {
     html += `</div>`;
     document.getElementById("feed-content").innerHTML = html;
     
-    // Button aktivieren
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
     const haschismusBtn = document.getElementById('haschismus-btn');
     if (haschismusBtn) haschismusBtn.classList.add('active');
-}
-
-// Debug-Funktion
-function showDebugInfo() {
-    console.log("=== DEBUG INFO ===");
-    console.log("Gespeicherte Kommentare:", savedComments);
-    console.log("LocalStorage:", localStorage.getItem('haschismus_comments'));
 }
 
 // Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Seite geladen, initialisiere...");
     loadSavedComments();
-    // Standardmäßig Deutschlandfunk laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
