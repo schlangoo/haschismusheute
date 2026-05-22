@@ -17,8 +17,18 @@
         <button onclick="loadFeed('trumpino', false, this)">Trumpino</button>
         <button onclick="loadFeed('scmp', false, this)">South China Morning Post</button>
         <button onclick="loadFeed('irna', false, this)">IRNA</button>
+        <button onclick="loadCommentedFeed()" id="haschismus-btn">★ Haschismus Heute ★</button>
     </div>
     <div id="feed-content"></div>
+    
+    <!-- Kommentar-Modal für Utterances -->
+    <div id="comment-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="comment-container"></div>
+        </div>
+    </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
