@@ -15,12 +15,20 @@ h1 {
     letter-spacing: -0.3px;
 }
 
+.red-star {
+    color: #c00000;
+}
+
 .greeting {
     color: #666;
     font-size: 0.85rem;
     margin-bottom: 32px;
     padding-bottom: 16px;
     border-bottom: 1px solid #eaeaea;
+}
+
+.greeting s {
+    color: #999;
 }
 
 .feed-selector {
@@ -52,6 +60,10 @@ button.active {
     border-color: #111;
 }
 
+button.active .red-star {
+    color: #ff6666;
+}
+
 #feed-content {
     background: #fff;
 }
@@ -72,6 +84,10 @@ button.active {
     margin: 0 0 8px 0;
     font-size: 1.2rem;
     font-weight: 500;
+}
+
+.feed-item h3 s {
+    color: #999;
 }
 
 .feed-item a {
@@ -140,7 +156,7 @@ button.active {
     border-color: #aaa;
 }
 
-.haschismus-collection {
+.comments-collection {
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -153,58 +169,57 @@ button.active {
     border: 1px solid #eaeaea;
 }
 
-.commented-article h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 1rem;
-    font-weight: 500;
-}
-
-.original-summary {
-    color: #555;
-    font-size: 0.85rem;
-    margin: 10px 0;
-    padding: 10px 0;
-    line-height: 1.4;
-}
-
-.original-date {
-    color: #999;
-    display: block;
-    margin-bottom: 16px;
-    font-size: 0.7rem;
-}
-
-.my-comments {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #eaeaea;
-}
-
-.my-comments h4 {
-    color: #333;
+.comment-text {
     margin-bottom: 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
 }
 
-.comment-box {
-    background: #fff;
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 6px;
-    border: 1px solid #eee;
-}
-
-.comment-box p {
+.comment-text p {
     margin: 0 0 6px 0;
     color: #111;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    line-height: 1.5;
 }
 
-.comment-box small {
-    font-size: 0.65rem;
+.comment-text p s {
     color: #999;
+}
+
+.comment-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+    font-size: 0.7rem;
+    color: #999;
+}
+
+.comment-to {
+    color: #666;
+    font-style: italic;
+}
+
+.comment-link {
+    margin-top: 8px;
+    padding-top: 8px;
+    font-size: 0.75rem;
+}
+
+.comment-link a {
+    color: #555;
+    text-decoration: none;
+    border-bottom: 1px solid #ddd;
+    word-break: break-all;
+}
+
+.comment-link a:hover {
+    color: #111;
+    border-bottom-color: #aaa;
+}
+
+.article-title-link {
+    font-weight: 500;
 }
 
 .delete-comment-btn {
@@ -214,6 +229,7 @@ button.active {
     font-size: 0.65rem;
     padding: 3px 10px;
     margin-top: 8px;
+    cursor: pointer;
 }
 
 .delete-comment-btn:hover {
@@ -222,7 +238,7 @@ button.active {
     border-color: #ddd;
 }
 
-.empty-haschismus {
+.empty-comments {
     text-align: center;
     padding: 60px 20px;
     background: #fafafa;
@@ -230,7 +246,7 @@ button.active {
     border: 1px solid #eaeaea;
 }
 
-.empty-haschismus p {
+.empty-comments p {
     margin: 10px 0;
     font-size: 0.85rem;
     color: #666;
@@ -259,5 +275,9 @@ button.active {
     button {
         padding: 6px 12px;
         font-size: 0.75rem;
+    }
+    
+    .comment-meta {
+        font-size: 0.65rem;
     }
 }
