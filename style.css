@@ -2,73 +2,64 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
     max-width: 800px;
     margin: 0 auto;
-    padding: 20px;
-    background: #ffffff;
-    color: #1a1a1a;
+    padding: 24px;
+    background: #fff;
+    color: #111;
     line-height: 1.5;
 }
 
 h1 {
-    color: #1a1a1a;
-    text-align: center;
-    font-size: 2em;
-    margin: 20px 0 10px;
+    font-size: 1.8rem;
     font-weight: 600;
+    margin: 0 0 8px 0;
     letter-spacing: -0.3px;
 }
 
 .greeting {
-    text-align: center;
     color: #666;
-    margin-bottom: 30px;
-    font-size: 0.9em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 20px;
+    font-size: 0.85rem;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eaeaea;
 }
 
 .feed-selector {
     display: flex;
     gap: 8px;
-    margin-bottom: 30px;
+    margin-bottom: 32px;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
 button {
     padding: 8px 16px;
-    background: #f0f0f0;
+    background: #f5f5f5;
     color: #333;
     border: 1px solid #ddd;
     border-radius: 6px;
     cursor: pointer;
-    font-family: inherit;
-    font-size: 0.85em;
+    font-size: 0.85rem;
     font-weight: 500;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
 }
 
 button:hover {
-    background: #e0e0e0;
-    border-color: #ccc;
+    background: #eaeaea;
 }
 
 button.active {
-    background: #1a1a1a;
-    color: white;
-    border-color: #1a1a1a;
+    background: #111;
+    color: #fff;
+    border-color: #111;
 }
 
 #feed-content {
-    background: #fafafa;
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px solid #eee;
+    background: #fff;
 }
 
 .feed-item {
-    margin-bottom: 30px;
-    padding-bottom: 30px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #eaeaea;
 }
 
 .feed-item:last-child {
@@ -78,26 +69,25 @@ button.active {
 }
 
 .feed-item h3 {
-    margin: 0 0 10px 0;
-    font-size: 1.2em;
-    font-weight: 600;
+    margin: 0 0 8px 0;
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 .feed-item a {
-    color: #1a1a1a;
+    color: #111;
     text-decoration: none;
     border-bottom: 1px solid #ddd;
 }
 
 .feed-item a:hover {
-    color: #333;
-    border-bottom-color: #999;
+    color: #555;
 }
 
 .feed-item p {
-    color: #555;
-    margin: 10px 0;
-    font-size: 0.9em;
+    color: #444;
+    margin: 8px 0;
+    font-size: 0.9rem;
     line-height: 1.5;
 }
 
@@ -105,188 +95,169 @@ button.active {
     color: #999;
     display: block;
     margin-top: 8px;
-    font-size: 0.75em;
+    font-size: 0.7rem;
 }
 
 .comment-section {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+    margin-top: 16px;
+    padding-top: 12px;
 }
 
 .comment-input {
     width: 100%;
-    padding: 10px;
-    background: white;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    padding: 10px 0;
+    background: transparent;
+    color: #111;
+    border: none;
+    border-bottom: 1px solid #ddd;
     font-family: inherit;
-    font-size: 0.85em;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    margin-bottom: 10px;
     resize: vertical;
     box-sizing: border-box;
 }
 
 .comment-input:focus {
     outline: none;
-    border-color: #999;
+    border-bottom-color: #111;
 }
 
 .comment-input::placeholder {
     color: #bbb;
-    font-size: 0.85em;
+    font-size: 0.85rem;
 }
 
 .save-comment-btn {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: white;
-    padding: 6px 14px;
-    font-size: 0.8em;
+    background: transparent;
+    border: 1px solid #ccc;
+    color: #333;
+    padding: 4px 12px;
+    font-size: 0.75rem;
 }
 
 .save-comment-btn:hover {
-    background: #333;
-    border-color: #333;
+    background: #f5f5f5;
+    border-color: #aaa;
 }
 
 .haschismus-collection {
     display: flex;
     flex-direction: column;
-    gap: 25px;
+    gap: 24px;
 }
 
 .commented-article {
-    background: white;
+    background: #fafafa;
     padding: 20px;
     border-radius: 8px;
-    border: 1px solid #eee;
+    border: 1px solid #eaeaea;
 }
 
 .commented-article h3 {
     margin-top: 0;
     margin-bottom: 8px;
-    font-size: 1.1em;
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 .original-summary {
-    color: #666;
-    font-size: 0.85em;
+    color: #555;
+    font-size: 0.85rem;
     margin: 10px 0;
-    padding: 10px;
-    background: #f5f5f5;
-    border-radius: 6px;
+    padding: 10px 0;
     line-height: 1.4;
 }
 
 .original-date {
     color: #999;
     display: block;
-    margin-bottom: 15px;
-    font-size: 0.7em;
+    margin-bottom: 16px;
+    font-size: 0.7rem;
 }
 
 .my-comments {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #eee;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #eaeaea;
 }
 
 .my-comments h4 {
     color: #333;
     margin-bottom: 12px;
-    font-size: 0.85em;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 500;
 }
 
 .comment-box {
-    background: #f5f5f5;
+    background: #fff;
     padding: 12px;
     margin-bottom: 10px;
     border-radius: 6px;
+    border: 1px solid #eee;
 }
 
 .comment-box p {
     margin: 0 0 6px 0;
-    color: #333;
-    font-size: 0.85em;
+    color: #111;
+    font-size: 0.85rem;
 }
 
 .comment-box small {
-    font-size: 0.7em;
+    font-size: 0.65rem;
     color: #999;
 }
 
 .delete-comment-btn {
-    background: #fff0f0;
-    border-color: #ffcccc;
-    color: #c00000;
-    font-size: 0.7em;
-    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid #e0e0e0;
+    color: #999;
+    font-size: 0.65rem;
+    padding: 3px 10px;
     margin-top: 8px;
 }
 
 .delete-comment-btn:hover {
-    background: #ffe0e0;
-    border-color: #ffaaaa;
+    background: #f5f5f5;
+    color: #c00;
+    border-color: #ddd;
 }
 
 .empty-haschismus {
     text-align: center;
-    padding: 50px 20px;
-    background: white;
+    padding: 60px 20px;
+    background: #fafafa;
     border-radius: 8px;
-    border: 1px solid #eee;
+    border: 1px solid #eaeaea;
 }
 
 .empty-haschismus p {
-    margin: 12px 0;
-    font-size: 0.85em;
+    margin: 10px 0;
+    font-size: 0.85rem;
     color: #666;
-}
-
-.empty-haschismus p:first-child {
-    color: #333;
-    font-weight: 500;
 }
 
 .no-articles, .error {
     text-align: center;
     color: #999;
     padding: 40px 20px;
-    font-size: 0.9em;
+    font-size: 0.85rem;
 }
 
 .error {
-    color: #c00000;
-    background: #fff5f5;
-    border-radius: 6px;
+    color: #c00;
 }
 
 @media (max-width: 768px) {
     body {
-        padding: 15px;
+        padding: 16px;
     }
     
     h1 {
-        font-size: 1.6em;
-    }
-    
-    .feed-selector {
-        gap: 6px;
+        font-size: 1.5rem;
     }
     
     button {
         padding: 6px 12px;
-        font-size: 0.8em;
-    }
-    
-    #feed-content {
-        padding: 15px;
-    }
-    
-    .feed-item h3 {
-        font-size: 1em;
+        font-size: 0.75rem;
     }
 }
