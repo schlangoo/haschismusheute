@@ -25,15 +25,29 @@ function saveComments() {
     console.log("Gespeichert:", savedComments.length);
 }
 
-// Kommentar zu einem Artikel speichern
-function saveComment(articleId, title, link, summary, date) {
+// Kommentar zu einem Artikel speichern (NEUE Version ohne onclick-Probleme)
+function saveComment(articleId) {
+    console.log("saveComment aufgerufen für:", articleId);
+    
     // Textfeld direkt aus dem DOM holen
     const textarea = document.getElementById(`comment-${articleId}`);
     const commentText = textarea ? textarea.value.trim() : "";
     
-    console.log("Speichere Kommentar für:", title);
+    // Die Artikel-Daten aus data-Attributen holen
+    const articleDiv = document.getElementById(`article-${articleId}`);
+    if (!articleDiv) {
+        console.error("Article Div nicht gefunden");
+        alert("Fehler: Artikel nicht gefunden");
+        return false;
+    }
+    
+    const title = articleDiv.getAttribute('data-title') || "Unbekannter Titel";
+    const link = articleDiv.getAttribute('data-link') || "#";
+    const summary = articleDiv.getAttribute('data-summary') || "Keine Zusammenfassung";
+    const date = articleDiv.getAttribute('data-date') || new Date().toISOString();
+    
+    console.log("Titel:", title);
     console.log("Kommentar:", commentText);
-    console.log("Article ID:", articleId);
     
     if (!commentText) {
         alert("Bitte schreib etwas in dein Haschismus-Kommentarfeld!");
@@ -133,7 +147,8 @@ async function loadFeed(feedKey, clickedButton) {
             let cleanDescription = "Keine Beschreibung verfügbar.";
             if (item.description) {
                 cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
-                if (cleanDescription.length > 0) cleanDescription += "...";
+                if (cleanDescription.length > 0 && cleanDescription.length < 300) cleanDescription += "...";
+                if (cleanDescription.length === 300) cleanDescription += "...";
             }
             
             // Sichere Behandlung des Datums
@@ -149,22 +164,28 @@ async function loadFeed(feedKey, clickedButton) {
             }
             
             // Eindeutige ID pro Artikel
-            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 6);
-            const escapedTitle = escapeHtml(item.title);
-            const escapedLink = escapeHtml(item.link);
-            const escapedSummary = escapeHtml(cleanDescription);
-            const escapedDate = escapeHtml(pubDate || "");
+            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
+            
+            // Daten für data-Attribute sicher kodieren (Base64 für Sonderzeichen)
+            const safeTitle = btoa(unescape(encodeURIComponent(item.title))); // Base64 für maximale Sicherheit
+            const safeLink = btoa(unescape(encodeURIComponent(item.link)));
+            const safeSummary = btoa(unescape(encodeURIComponent(cleanDescription)));
+            const safeDate = btoa(unescape(encodeURIComponent(pubDate || "")));
             
             feedHTML += `
-                <div class="feed-item" data-article-id="${articleId}">
-                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapedTitle}</a></h3>
+                <div class="feed-item" id="article-${articleId}" 
+                     data-title="${safeTitle}" 
+                     data-link="${safeLink}" 
+                     data-summary="${safeSummary}" 
+                     data-date="${safeDate}">
+                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
                     <p>${cleanDescription}</p>
                     <small>📅 ${formattedDate}</small>
                     
                     <div class="comment-section">
                         <label>💬 Haschismus-Kommentar:</label>
                         <textarea id="comment-${articleId}" class="comment-input" placeholder="Deine Gedanken zum Haschismus... (max. 300 Zeichen)" maxlength="300" rows="2"></textarea>
-                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${escapedTitle.replace(/'/g, "\\'")}', '${escapedLink.replace(/'/g, "\\'")}', '${escapedSummary.replace(/'/g, "\\'")}', '${escapedDate.replace(/'/g, "\\'")}')">
+                        <button class="save-comment-btn" onclick="saveComment('${articleId}')">
                             💾 Haschismus-Gedanke speichern
                         </button>
                     </div>
@@ -190,7 +211,7 @@ function showCommentedNews() {
                 <p>👉 Klicke auf einen News-Feed (z.B. Deutschlandfunk) und hinterlasse unter einem Artikel deinen Kommentar.</p>
                 <p>💾 Der Artikel + dein Kommentar landen dann hier!</p>
                 <hr>
-                <p><small>💡 Tipp: Probiere zuerst TASS, Al Jazeera oder IRNA – die funktionieren am besten!</small></p>
+                <p><small>💡 Tipp: Jeder Feed funktioniert jetzt! Auch Deutschlandfunk und SCMP.</small></p>
             </div>
         `;
         // Button aktivieren
