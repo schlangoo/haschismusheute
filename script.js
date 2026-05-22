@@ -10,7 +10,7 @@ const RSS_FEEDS = {
 let savedComments = [];
 
 function loadSavedComments() {
-    const saved = localStorage.getItem('haschismus_comments');
+    const saved = localStorage.getItem('comments');
     if (saved) {
         try {
             savedComments = JSON.parse(saved);
@@ -21,7 +21,7 @@ function loadSavedComments() {
 }
 
 function saveComments() {
-    localStorage.setItem('haschismus_comments', JSON.stringify(savedComments));
+    localStorage.setItem('comments', JSON.stringify(savedComments));
 }
 
 function safeBase64Encode(str) {
@@ -52,7 +52,7 @@ function saveComment(articleId) {
     
     const commentText = textarea.value.trim();
     if (!commentText) {
-        alert("Bitte einen Kommentar eingeben.");
+        alert("Bitte etwas schreiben.");
         return false;
     }
     
@@ -66,7 +66,7 @@ function saveComment(articleId) {
     
     let title = "Unbekannter Titel";
     let link = "#";
-    let summary = "Keine Zusammenfassung";
+    let summary = "";
     let date = new Date().toISOString();
     
     try {
@@ -109,7 +109,7 @@ function saveComment(articleId) {
     }
     
     saveComments();
-    alert("Kommentar gespeichert.");
+    alert("Gespeichert.");
     textarea.value = "";
     return true;
 }
@@ -157,13 +157,13 @@ async function loadFeed(feedKey, clickedButton) {
         
         let feedHTML = "";
         data.items.forEach((item, index) => {
-            let cleanDescription = "Keine Beschreibung verfügbar.";
+            let cleanDescription = "";
             if (item.description && item.description !== "undefined") {
                 cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
                 if (cleanDescription.length > 0) cleanDescription += "...";
             }
             
-            let formattedDate = "Datum unbekannt";
+            let formattedDate = "";
             if (item.pubDate && item.pubDate !== "undefined") {
                 try {
                     const dateObj = new Date(item.pubDate);
@@ -193,7 +193,7 @@ async function loadFeed(feedKey, clickedButton) {
                     <small>${escapeHtml(formattedDate)}</small>
                     
                     <div class="comment-section">
-                        <textarea id="comment-${articleId}" class="comment-input" placeholder="Kommentar..." maxlength="300" rows="2"></textarea>
+                        <textarea id="comment-${articleId}" class="comment-input" placeholder="Kommentar" maxlength="300" rows="2"></textarea>
                         <button class="save-comment-btn" onclick="saveComment('${articleId}')">Speichern</button>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ async function loadFeed(feedKey, clickedButton) {
         document.getElementById("feed-content").innerHTML = feedHTML;
         
     } catch (error) {
-        document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden des Feeds.</p>`;
+        document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden.</p>`;
     }
 }
 
@@ -214,19 +214,19 @@ function showCommentedNews() {
         document.getElementById("feed-content").innerHTML = `
             <div class="empty-haschismus">
                 <p>Keine gespeicherten Kommentare.</p>
-                <p>Wähle einen Feed und hinterlasse einen Kommentar.</p>
+                <p>Wähle einen Feed und schreibe etwas.</p>
             </div>
         `;
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-        const haschismusBtn = document.getElementById('haschismus-btn');
-        if (haschismusBtn) haschismusBtn.classList.add('active');
+        const notesBtn = document.getElementById('haschismus-btn');
+        if (notesBtn) notesBtn.classList.add('active');
         return;
     }
     
     let html = `<div class="haschismus-collection">`;
     
     [...savedComments].reverse().forEach(article => {
-        let displayDate = "Datum unbekannt";
+        let displayDate = "";
         if (article.originalDate && article.originalDate !== "undefined" && article.originalDate !== "") {
             try {
                 const dateObj = new Date(article.originalDate);
@@ -243,7 +243,7 @@ function showCommentedNews() {
                 <small class="original-date">${escapeHtml(displayDate)}</small>
                 
                 <div class="my-comments">
-                    <h4>Kommentare:</h4>
+                    <h4>Notizen</h4>
         `;
         
         article.comments.forEach(comment => {
@@ -264,8 +264,8 @@ function showCommentedNews() {
     document.getElementById("feed-content").innerHTML = html;
     
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-    const haschismusBtn = document.getElementById('haschismus-btn');
-    if (haschismusBtn) haschismusBtn.classList.add('active');
+    const notesBtn = document.getElementById('haschismus-btn');
+    if (notesBtn) notesBtn.classList.add('active');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
