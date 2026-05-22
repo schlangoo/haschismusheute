@@ -10,25 +10,19 @@
 <body>
     <h1>★ Haschismus Heute ★</h1>
     <p class="greeting">Die Tagesnachrichten der <s>Arbeiter</s> Alibi Partei der umherschweifenden Haschisten</p>
+    
     <div class="feed-selector">
-        <button onclick="loadFeed('deutschlandfunk', false, this)">Deutschlandfunk</button>
-        <button onclick="loadFeed('tass', false, this)">TASS</button>
-        <button onclick="loadFeed('aljazeera', false, this)">Al Jazeera</button>
-        <button onclick="loadFeed('trumpino', false, this)">Trumpino</button>
-        <button onclick="loadFeed('scmp', false, this)">South China Morning Post</button>
-        <button onclick="loadFeed('irna', false, this)">IRNA</button>
-        <button onclick="loadCommentedFeed()" id="haschismus-btn">★ Haschismus Heute ★</button>
+        <button onclick="loadFeed('deutschlandfunk', this)">Deutschlandfunk</button>
+        <button onclick="loadFeed('tass', this)">TASS</button>
+        <button onclick="loadFeed('aljazeera', this)">Al Jazeera</button>
+        <button onclick="loadFeed('trumpino', this)">Trumpino</button>
+        <button onclick="loadFeed('scmp', this)">South China Morning Post</button>
+        <button onclick="loadFeed('irna', this)">IRNA</button>
+        <button onclick="showCommentedNews()" id="haschismus-btn">★ Haschismus Heute ★</button>
     </div>
+    
     <div id="feed-content"></div>
-    
-    <!-- Kommentar-Modal für Utterances -->
-    <div id="comment-modal" class="modal">
-        <div class="modal-content">
-            <span class="close">&times;</span>
-            <div id="comment-container"></div>
-        </div>
-    </div>
-    
+
     <script src="script.js"></script>
 </body>
 </html>
