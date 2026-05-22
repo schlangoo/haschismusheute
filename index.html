@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haschismus Heute</title>
+    <title>Nachrichten</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>★ Haschismus Heute ★</h1>
-    <p class="greeting">Die Tagesnachrichten der <s>Arbeiter</s> Alibi Partei der umherschweifenden Haschisten</p>
+    <h1>Nachrichten</h1>
+    <p class="greeting">Internationale Presseschau</p>
     
     <div class="feed-selector">
         <button onclick="loadFeed('deutschlandfunk', this)">Deutschlandfunk</button>
         <button onclick="loadFeed('tass', this)">TASS</button>
         <button onclick="loadFeed('aljazeera', this)">Al Jazeera</button>
-        <button onclick="loadFeed('trumpino', this)">Trumpino</button>
-        <button onclick="loadFeed('scmp', this)">South China Morning Post</button>
+        <button onclick="loadFeed('trumpino', this)">Trump</button>
+        <button onclick="loadFeed('scmp', this)">SCMP</button>
         <button onclick="loadFeed('irna', this)">IRNA</button>
-        <button onclick="showCommentedNews()" id="haschismus-btn">★ Haschismus Heute ★</button>
+        <button onclick="showCommentedNews()" id="haschismus-btn">Notizen</button>
     </div>
     
     <div id="feed-content"></div>
