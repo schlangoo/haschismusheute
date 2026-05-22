@@ -25,6 +25,32 @@ function saveComments() {
     console.log("Gespeichert:", savedComments.length);
 }
 
+// Sichere Base64-Kodierung für UTF-8 (funktioniert mit Umlauten!)
+function safeBase64Encode(str) {
+    if (!str) return "";
+    try {
+        // Verwende encodeURIComponent + btoa für UTF-8 Sicherheit
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+            return String.fromCharCode(parseInt(p1, 16));
+        }));
+    } catch(e) {
+        console.warn("Base64 Fehler, fallback auf leeren String");
+        return "";
+    }
+}
+
+// Sichere Base64-Dekodierung
+function safeBase64Decode(str) {
+    if (!str) return "";
+    try {
+        return decodeURIComponent(atob(str).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    } catch(e) {
+        return str;
+    }
+}
+
 // Kommentar zu einem Artikel speichern
 function saveComment(articleId) {
     console.log("saveComment aufgerufen für:", articleId);
@@ -33,30 +59,26 @@ function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
     const commentText = textarea ? textarea.value.trim() : "";
     
-    // Die Artikel-Daten aus data-Attributen holen (jetzt als JSON gespeichert)
+    // Die Artikel-Daten aus data-Attributen holen (Base64 dekodieren)
     const articleDiv = document.getElementById(`article-${articleId}`);
     if (!articleDiv) {
-        console.error("Article Div nicht gefunden");
+        console.error("Article Div nicht gefunden für:", articleId);
         alert("Fehler: Artikel nicht gefunden");
         return false;
     }
     
-    // Daten aus data- Attributen holen (jetzt als JSON-String)
-    let articleData;
-    try {
-        articleData = JSON.parse(articleDiv.getAttribute('data-article') || '{}');
-    } catch(e) {
-        console.error("Fehler beim Parsen der Artikel-Daten:", e);
-        alert("Fehler: Artikel-Daten konnten nicht gelesen werden");
-        return false;
-    }
+    // Daten aus data-Attributen holen und dekodieren
+    const titleEncoded = articleDiv.getAttribute('data-title') || "";
+    const linkEncoded = articleDiv.getAttribute('data-link') || "";
+    const summaryEncoded = articleDiv.getAttribute('data-summary') || "";
+    const dateEncoded = articleDiv.getAttribute('data-date') || "";
     
-    const title = articleData.title || "Unbekannter Titel";
-    const link = articleData.link || "#";
-    const summary = articleData.summary || "Keine Zusammenfassung";
-    const date = articleData.date || new Date().toISOString();
+    const title = safeBase64Decode(titleEncoded) || "Unbekannter Titel";
+    const link = safeBase64Decode(linkEncoded) || "#";
+    const summary = safeBase64Decode(summaryEncoded) || "Keine Zusammenfassung";
+    const date = safeBase64Decode(dateEncoded) || new Date().toISOString();
     
-    console.log("Titel:", title);
+    console.log("Titel dekodiert:", title);
     console.log("Kommentar:", commentText);
     
     if (!commentText) {
@@ -119,7 +141,7 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Normalen Feed laden
+// Normalen Feed laden (mit Kommentarfeld unter jedem Artikel)
 async function loadFeed(feedKey, clickedButton) {
     // Aktiven Button markieren
     document.querySelectorAll('.feed-selector button').forEach(btn => {
@@ -144,38 +166,41 @@ async function loadFeed(feedKey, clickedButton) {
         
         let feedHTML = "";
         data.items.forEach((item, index) => {
-            // Beschreibung bereinigen
+            // Bereinige die Beschreibung sicher
             let cleanDescription = "Keine Beschreibung verfügbar.";
             if (item.description) {
                 cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 300);
-                if (cleanDescription.length > 0) cleanDescription += "...";
+                if (cleanDescription.length > 0 && cleanDescription.length < 300) cleanDescription += "...";
+                if (cleanDescription.length === 300) cleanDescription += "...";
             }
             
-            // Datum formatieren
+            // Sichere Behandlung des Datums
+            let pubDate = item.pubDate;
             let formattedDate = "Datum unbekannt";
-            if (item.pubDate) {
+            if (pubDate) {
                 try {
-                    formattedDate = new Date(item.pubDate).toLocaleString();
+                    formattedDate = new Date(pubDate).toLocaleString();
                     if (formattedDate === "Invalid Date") formattedDate = "Datum unbekannt";
                 } catch(e) {
                     formattedDate = "Datum unbekannt";
                 }
             }
             
-            // Eindeutige ID
+            // Eindeutige ID pro Artikel
             const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
             
-            // Artikel-Daten als JSON für data-Attribut (sicher und einfach)
-            const articleData = {
-                title: item.title,
-                link: item.link,
-                summary: cleanDescription,
-                date: item.pubDate || new Date().toISOString()
-            };
-            const articleDataJson = JSON.stringify(articleData).replace(/"/g, '&quot;');
+            // Daten für data-Attribute sicher kodieren (mit neuer sicherer Funktion)
+            const safeTitle = safeBase64Encode(item.title);
+            const safeLink = safeBase64Encode(item.link);
+            const safeSummary = safeBase64Encode(cleanDescription);
+            const safeDate = safeBase64Encode(pubDate || "");
             
             feedHTML += `
-                <div class="feed-item" id="article-${articleId}" data-article='${articleDataJson}'>
+                <div class="feed-item" id="article-${articleId}" 
+                     data-title="${safeTitle}" 
+                     data-link="${safeLink}" 
+                     data-summary="${safeSummary}" 
+                     data-date="${safeDate}">
                     <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
                     <p>${escapeHtml(cleanDescription)}</p>
                     <small>📅 ${escapeHtml(formattedDate)}</small>
@@ -192,6 +217,8 @@ async function loadFeed(feedKey, clickedButton) {
         });
         
         document.getElementById("feed-content").innerHTML = feedHTML;
+        console.log(`Feed geladen: ${feedKey}, ${data.items.length} Artikel`);
+        
     } catch (error) {
         console.error("Fehler:", error);
         document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden des Feeds: ${error.message}</p>`;
@@ -262,6 +289,13 @@ function showCommentedNews() {
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
     const haschismusBtn = document.getElementById('haschismus-btn');
     if (haschismusBtn) haschismusBtn.classList.add('active');
+}
+
+// Debug-Funktion
+function showDebugInfo() {
+    console.log("=== DEBUG INFO ===");
+    console.log("Gespeicherte Kommentare:", savedComments);
+    console.log("LocalStorage:", localStorage.getItem('haschismus_comments'));
 }
 
 // Initialisierung
