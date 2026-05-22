@@ -25,13 +25,14 @@ function saveComments() {
     console.log("Gespeichert:", savedComments.length);
 }
 
-// Kommentar zu einem Artikel speichern (verbesserte Version)
+// Kommentar zu einem Artikel speichern
 function saveComment(articleId, title, link, summary, date) {
     // Textfeld direkt aus dem DOM holen
     const textarea = document.getElementById(`comment-${articleId}`);
     const commentText = textarea ? textarea.value.trim() : "";
     
     console.log("Speichere Kommentar für:", title);
+    console.log("Artikel ID:", articleId);
     console.log("Kommentar:", commentText);
     
     if (!commentText) {
@@ -49,11 +50,9 @@ function saveComment(articleId, title, link, summary, date) {
     };
     
     if (existingIndex !== -1) {
-        // Kommentar zum bestehenden Artikel hinzufügen
         savedComments[existingIndex].comments.push(commentEntry);
         console.log("Kommentar zu bestehendem Artikel hinzugefügt");
     } else {
-        // Neuen Artikel anlegen
         savedComments.push({
             id: articleId,
             title: title,
@@ -80,12 +79,11 @@ function deleteComment(articleId, commentId) {
     if (article) {
         article.comments = article.comments.filter(c => c.id !== commentId);
         if (article.comments.length === 0) {
-            // Artikel komplett entfernen wenn keine Kommentare mehr
             const index = savedComments.findIndex(a => a.id === articleId);
             if (index !== -1) savedComments.splice(index, 1);
         }
         saveComments();
-        showCommentedNews(); // Ansicht aktualisieren
+        showCommentedNews();
     }
 }
 
@@ -97,7 +95,13 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// Normalen Feed laden (mit Kommentarfeld unter jedem Artikel)
+// Sicherer String für onclick (entfernt Probleme mit Anführungszeichen)
+function makeSafeForOnclick(str) {
+    if (!str) return '';
+    return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// Normalen Feed laden
 async function loadFeed(feedKey, clickedButton) {
     // Aktiven Button markieren
     document.querySelectorAll('.feed-selector button').forEach(btn => {
@@ -123,23 +127,25 @@ async function loadFeed(feedKey, clickedButton) {
         let feedHTML = "";
         data.items.forEach((item, index) => {
             const cleanDescription = item.description ? item.description.replace(/<[^>]*>/g, "").substring(0, 300) + "..." : "Keine Beschreibung.";
-            // Eindeutige ID pro Artikel (basierend auf Link + Index)
-            const articleId = "art_" + btoa(item.link).replace(/[^a-zA-Z0-9]/g, '').substring(0, 20) + "_" + index;
-            const escapedTitle = escapeHtml(item.title);
-            const escapedLink = escapeHtml(item.link);
-            const escapedSummary = escapeHtml(cleanDescription);
-            const escapedDate = escapeHtml(item.pubDate);
+            // Eindeutige ID pro Artikel
+            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 5);
+            
+            // Daten für den onclick sicher machen
+            const safeTitle = makeSafeForOnclick(item.title);
+            const safeLink = makeSafeForOnclick(item.link);
+            const safeSummary = makeSafeForOnclick(cleanDescription);
+            const safeDate = makeSafeForOnclick(item.pubDate);
             
             feedHTML += `
-                <div class="feed-item" data-article-id="${articleId}">
-                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapedTitle}</a></h3>
+                <div class="feed-item">
+                    <h3><a href="${item.link}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a></h3>
                     <p>${cleanDescription}</p>
                     <small>📅 ${new Date(item.pubDate).toLocaleString()}</small>
                     
                     <div class="comment-section">
                         <label>💬 Haschismus-Kommentar:</label>
                         <textarea id="comment-${articleId}" class="comment-input" placeholder="Deine Gedanken zum Haschismus... (max. 300 Zeichen)" maxlength="300" rows="2"></textarea>
-                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${escapedTitle.replace(/'/g, "\\'")}', '${escapedLink.replace(/'/g, "\\'")}', '${escapedSummary.replace(/'/g, "\\'")}', '${escapedDate.replace(/'/g, "\\'")}')">
+                        <button class="save-comment-btn" onclick="saveComment('${articleId}', '${safeTitle}', '${safeLink}', '${safeSummary}', '${safeDate}')">
                             💾 Haschismus-Gedanke speichern
                         </button>
                     </div>
@@ -154,9 +160,9 @@ async function loadFeed(feedKey, clickedButton) {
     }
 }
 
-// "Haschismus Heute" anzeigen – alle kommentierten Artikel mit deinen Gedanken
+// "Haschismus Heute" anzeigen
 function showCommentedNews() {
-    loadSavedComments(); // Neu laden um sicherzustellen dass alles aktuell ist
+    loadSavedComments();
     
     if (savedComments.length === 0) {
         document.getElementById("feed-content").innerHTML = `
@@ -166,7 +172,6 @@ function showCommentedNews() {
                 <p>💾 Der Artikel + dein Kommentar landen dann hier!</p>
             </div>
         `;
-        // Button aktivieren
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
         const haschismusBtn = document.getElementById('haschismus-btn');
         if (haschismusBtn) haschismusBtn.classList.add('active');
@@ -175,7 +180,7 @@ function showCommentedNews() {
     
     let html = `<div class="haschismus-collection">`;
     
-    // Neueste zuerst (mit reverse)
+    // Neueste zuerst
     [...savedComments].reverse().forEach(article => {
         html += `
             <div class="commented-article">
@@ -206,23 +211,15 @@ function showCommentedNews() {
     html += `</div>`;
     document.getElementById("feed-content").innerHTML = html;
     
-    // Button aktivieren
     document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
     const haschismusBtn = document.getElementById('haschismus-btn');
     if (haschismusBtn) haschismusBtn.classList.add('active');
-}
-
-// Test-Funktion für Debugging (in Konsole aufrufbar)
-function testSave() {
-    console.log("Test-Save Funktion");
-    console.log("Aktuelle savedComments:", savedComments);
 }
 
 // Initialisierung
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Seite geladen, initialisiere...");
     loadSavedComments();
-    // Standardmäßig Deutschlandfunk laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
