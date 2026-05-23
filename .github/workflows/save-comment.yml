@@ -1,0 +1,82 @@
+name: Issues verarbeiten
+
+on:
+  issues:
+    types: [opened]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    if: contains(github.event.issue.labels.*.name, 'kommentar')
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Kommentar aus Issue extrahieren und speichern
+        run: |
+          python3 -c "
+import json, os
+
+issue_body = '''${{ github.event.issue.body }}'''
+issue_title = '${{ github.event.issue.title }}'
+
+# Extrahiere Kommentar und Artikel
+lines = issue_body.split('\n')
+comment = ''
+article = ''
+mode = None
+
+for line in lines:
+    if line.startswith('KOMMENTAR:'):
+        mode = 'comment'
+        comment = line.replace('KOMMENTAR:', '').strip()
+    elif line.startswith('ARTIKEL:'):
+        mode = 'article'
+        article = line.replace('ARTIKEL:', '').strip()
+    elif mode == 'comment':
+        comment += '\n' + line
+    elif mode == 'article':
+        article += '\n' + line
+
+if not comment:
+    comment = issue_body.split('KOMMENTAR:')[1].split('ARTIKEL:')[0].strip() if 'KOMMENTAR:' in issue_body else issue_body.strip()
+if not article:
+    article = issue_body.split('ARTIKEL:')[1].strip() if 'ARTIKEL:' in issue_body else issue_title
+
+# Kommentar speichern
+data = []
+try:
+    with open('comments.json', 'r') as f:
+        data = json.load(f)
+except:
+    pass
+
+data.append({
+    'article': article,
+    'comment': comment,
+    'date': '${{ github.event.issue.created_at }}'
+})
+
+with open('comments.json', 'w') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+
+print(f'Kommentar gespeichert: {article}')
+"
+          
+      - name: Issue schließen
+        run: |
+          gh issue close ${{ github.event.issue.number }} --repo ${{ github.repository }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          
+      - name: Hochladen
+        run: |
+          git config user.name "KommentarBot"
+          git config user.email "bot@haschismus-heute.org"
+          git add comments.json
+          git diff --staged --quiet || git commit -m "Kommentar aus Issue #${{ github.event.issue.number }}"
+          git push
