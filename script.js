@@ -1,3 +1,11 @@
+// ============================================
+// KONFIGURATION - HIER DEIN REPO EINTRAGEN!
+// ============================================
+const GITHUB_REPO = "schlangoo/haschismusheute"; // Z.B. "Haschist/Haschismus-Heute"
+
+// ============================================
+// RSS FEEDS
+// ============================================
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     tass: "https://tass.com/rss/v2.xml",
@@ -7,8 +15,14 @@ const RSS_FEEDS = {
     irna: "https://en.irna.ir/rss"
 };
 
+// ============================================
+// GLOBALE VARIABLEN
+// ============================================
 let savedComments = [];
 
+// ============================================
+// HILFSFUNKTIONEN
+// ============================================
 function formatStrikethrough(text) {
     if (!text) return '';
     return text.replace(/--(.*?)--/g, '<s>$1</s>');
@@ -51,72 +65,102 @@ function safeBase64Decode(str) {
     }
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// ============================================
+// KOMMENTAR FUNKTIONEN (NEU: GitHub Issues!)
+// ============================================
 function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
     if (!textarea) return false;
     
     const commentText = textarea.value.trim();
     if (!commentText) {
-        alert("Bitte etwas schreiben.");
+        alert("Bitte etwas schreiben, Genosse.");
         return false;
     }
     
     const articleDiv = document.getElementById(`article-${articleId}`);
     if (!articleDiv) return false;
     
+    // Titel für das Issue holen
     const titleEncoded = articleDiv.getAttribute('data-title') || "";
+    let titleDecoded = "Unbekannter Titel";
+    try {
+        if (titleEncoded && titleEncoded !== "") {
+            const decoded = safeBase64Decode(titleEncoded);
+            if (decoded && decoded !== "") titleDecoded = decoded;
+        }
+    } catch(e) {}
+    
+    // Issue-URL für GitHub bauen
+    const issueTitle = encodeURIComponent(`Kommentar: ${articleId}`);
+    const issueBody = encodeURIComponent(
+        `**Artikel:** ${titleDecoded}\n\n` +
+        `**Kommentar:**\n${commentText}\n\n` +
+        `---\n` +
+        `*Artikel-ID: ${articleId}*`
+    );
+    
+    const issueUrl = `https://github.com/${GITHUB_REPO}/issues/new?title=${issueTitle}&body=${issueBody}&labels=kommentar`;
+    
+    // In neuem Tab öffnen - JEDER kann das, auch ohne GitHub-Account!
+    window.open(issueUrl, '_blank');
+    
+    // Trotzdem lokal speichern (als Vorschau, bis die Action verarbeitet hat)
     const linkEncoded = articleDiv.getAttribute('data-link') || "";
     const summaryEncoded = articleDiv.getAttribute('data-summary') || "";
     const dateEncoded = articleDiv.getAttribute('data-date') || "";
     
-    let title = "Unbekannter Titel";
-    let link = "#";
-    let summary = "";
-    let date = new Date().toISOString();
+    let linkDecoded = "#";
+    let summaryDecoded = "";
+    let dateDecoded = new Date().toISOString();
     
     try {
-        if (titleEncoded && titleEncoded !== "") {
-            const decoded = safeBase64Decode(titleEncoded);
-            if (decoded && decoded !== "") title = decoded;
-        }
         if (linkEncoded && linkEncoded !== "") {
             const decoded = safeBase64Decode(linkEncoded);
-            if (decoded && decoded !== "") link = decoded;
+            if (decoded && decoded !== "") linkDecoded = decoded;
         }
         if (summaryEncoded && summaryEncoded !== "") {
             const decoded = safeBase64Decode(summaryEncoded);
-            if (decoded && decoded !== "") summary = decoded;
+            if (decoded && decoded !== "") summaryDecoded = decoded;
         }
         if (dateEncoded && dateEncoded !== "") {
             const decoded = safeBase64Decode(dateEncoded);
-            if (decoded && decoded !== "") date = decoded;
+            if (decoded && decoded !== "") dateDecoded = decoded;
         }
     } catch(e) {}
     
-    const existingIndex = savedComments.findIndex(item => item.id === articleId);
     const commentEntry = {
         id: Date.now(),
         text: commentText,
         date: new Date().toISOString(),
-        articleTitle: title,
-        articleLink: link
+        articleTitle: titleDecoded,
+        articleLink: linkDecoded
     };
     
+    const existingIndex = savedComments.findIndex(item => item.id === articleId);
     if (existingIndex !== -1) {
         savedComments[existingIndex].comments.push(commentEntry);
     } else {
         savedComments.push({
             id: articleId,
-            title: title,
-            link: link,
-            summary: summary,
-            originalDate: date,
+            title: titleDecoded,
+            link: linkDecoded,
+            summary: summaryDecoded,
+            originalDate: dateDecoded,
             comments: [commentEntry]
         });
     }
     
     saveComments();
-    alert("Kommentar gespeichert.");
+    
+    alert("Kommentar eingereicht! Bitte im neuen Tab auf 'Submit new issue' klicken. Kein Login nötig, Genosse! ✊\n\nDer Kommentar erscheint in wenigen Minuten auf der Seite.");
     textarea.value = "";
     return true;
 }
@@ -134,18 +178,40 @@ function deleteComment(articleId, commentId) {
     }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
+// ============================================
+// KOMMENTARE VON GITHUB LADEN
+// ============================================
+async function loadCommentsFromGitHub() {
+    try {
+        const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/comments.json`);
+        if (response.ok) {
+            const data = await response.json();
+            savedComments = data;
+            saveComments(); // Auch in localStorage speichern
+            console.log("✅ Kommentare von GitHub geladen:", savedComments.length, "Einträge");
+            return true;
+        } else {
+            console.log("ℹ️ Noch keine comments.json auf GitHub, nutze localStorage");
+        }
+    } catch(e) {
+        console.log("ℹ️ GitHub nicht erreichbar, nutze localStorage:", e.message);
+    }
+    
+    // Fallback: localStorage nutzen
+    loadSavedComments();
+    return false;
 }
 
+// ============================================
+// FEEDS LADEN
+// ============================================
 async function loadFeed(feedKey, clickedButton) {
     document.querySelectorAll('.feed-selector button').forEach(btn => {
         btn.classList.remove('active');
     });
-    clickedButton.classList.add('active');
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
     
     const feedUrl = RSS_FEEDS[feedKey];
     if (!feedUrl) {
@@ -216,6 +282,9 @@ async function loadFeed(feedKey, clickedButton) {
     }
 }
 
+// ============================================
+// KOMMENTIERTE ARTIKEL ANZEIGEN
+// ============================================
 function showCommentedNews() {
     loadSavedComments();
     
@@ -224,6 +293,10 @@ function showCommentedNews() {
             <div class="empty-comments">
                 <p>Keine Kommentare gespeichert.</p>
                 <p>Wähle einen Feed und schreibe etwas.</p>
+                <p style="margin-top: 10px; font-size: 0.75rem; color: #999;">
+                    💡 Tipp: Kommentare werden über GitHub Issues gespeichert.<br>
+                    Kein Login nötig, Genosse!
+                </p>
             </div>
         `;
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
@@ -236,16 +309,18 @@ function showCommentedNews() {
     
     let allComments = [];
     savedComments.forEach(article => {
-        article.comments.forEach(comment => {
-            allComments.push({
-                id: comment.id,
-                text: comment.text,
-                date: comment.date,
-                articleId: article.id,
-                articleTitle: article.title,
-                articleLink: article.link
+        if (article.comments && Array.isArray(article.comments)) {
+            article.comments.forEach(comment => {
+                allComments.push({
+                    id: comment.id,
+                    text: comment.text,
+                    date: comment.date,
+                    articleId: article.id,
+                    articleTitle: comment.articleTitle || article.title,
+                    articleLink: comment.articleLink || article.link
+                });
             });
-        });
+        }
     });
     
     allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -283,17 +358,28 @@ function showCommentedNews() {
     if (commentsBtn) commentsBtn.classList.add('active');
 }
 
+// ============================================
+// GRUSS FORMATIEREN
+// ============================================
 function formatGreeting() {
     const greetingElement = document.getElementById('greeting');
     if (greetingElement) {
-        const originalText = greetingElement.innerHTML;
+        const originalText = greetingElement.textContent;
         greetingElement.innerHTML = formatStrikethrough(escapeHtml(originalText));
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    loadSavedComments();
+// ============================================
+// INITIALISIERUNG
+// ============================================
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Kommentare von GitHub laden (oder localStorage als Fallback)
+    await loadCommentsFromGitHub();
+    
+    // 2. Gruß formatieren
     formatGreeting();
+    
+    // 3. Ersten Feed laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
