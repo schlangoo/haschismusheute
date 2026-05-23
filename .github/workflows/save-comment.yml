@@ -1,0 +1,31 @@
+name: Kommentar speichern
+on:
+  repository_dispatch:
+    types: [save_comment]
+  workflow_dispatch:
+    inputs:
+      article:
+        description: Artikel
+        required: true
+      comment:
+        description: Kommentar
+        required: true
+permissions:
+  contents: write
+jobs:
+  save:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Kommentar speichern
+        run: python3 .github/scripts/save.py
+        env:
+          ARTICLE: ${{ github.event.client_payload.article || github.event.inputs.article }}
+          COMMENT: ${{ github.event.client_payload.comment || github.event.inputs.comment }}
+      - name: Hochladen
+        run: |
+          git config user.name "KommentarBot"
+          git config user.email "bot@haschismus-heute.org"
+          git add comments.json
+          git diff --staged --quiet || git commit -m "Kommentar"
+          git push
