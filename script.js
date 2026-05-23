@@ -57,8 +57,63 @@ function safeBase64Decode(str) {
     }
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // ============================================
-// NEU: KOMMENTAR SPEICHERN (mit GitHub im Hintergrund)
+// KOMMENTARE VON GITHUB LADEN
+// ============================================
+async function loadCommentsFromGitHub() {
+    try {
+        const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/comments.json`);
+        if (response.ok) {
+            const githubComments = await response.json();
+            loadSavedComments();
+            
+            githubComments.forEach(gc => {
+                let exists = false;
+                for (let article of savedComments) {
+                    if (article.comments) {
+                        for (let c of article.comments) {
+                            if (c.text === gc.comment && c.articleTitle === gc.article) {
+                                exists = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (exists) break;
+                }
+                
+                if (!exists) {
+                    savedComments.push({
+                        id: "gh_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+                        title: gc.article,
+                        link: "#",
+                        summary: "",
+                        originalDate: gc.date,
+                        comments: [{
+                            id: Date.now() + Math.floor(Math.random() * 1000),
+                            text: gc.comment,
+                            date: gc.date,
+                            articleTitle: gc.article,
+                            articleLink: "#"
+                        }]
+                    });
+                }
+            });
+            saveComments();
+        }
+    } catch(e) {
+        loadSavedComments();
+    }
+}
+
+// ============================================
+// KOMMENTAR SPEICHERN
 // ============================================
 function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
@@ -102,7 +157,6 @@ function saveComment(articleId) {
         }
     } catch(e) {}
     
-    // Kommentar erstellen
     const commentEntry = {
         id: Date.now(),
         text: commentText,
@@ -111,7 +165,7 @@ function saveComment(articleId) {
         articleLink: link
     };
     
-    // 1. LOKAL SPEICHERN
+    // LOKAL SPEICHERN
     const existingIndex = savedComments.findIndex(item => item.id === articleId);
     if (existingIndex !== -1) {
         savedComments[existingIndex].comments.push(commentEntry);
@@ -127,7 +181,7 @@ function saveComment(articleId) {
     }
     saveComments();
     
-    // 2. AN GITHUB SENDEN (Hintergrund, merkt keiner)
+    // AN GITHUB SENDEN
     fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
         method: 'POST',
         headers: {
@@ -143,16 +197,13 @@ function saveComment(articleId) {
                 date: new Date().toISOString()
             }
         })
-    }).catch(() => {}); // Leise scheitern - lokal ist es ja gespeichert
+    }).catch(() => {});
     
     alert("Kommentar gespeichert.");
     textarea.value = "";
     return true;
 }
 
-// ============================================
-// UNVERÄNDERT: deleteComment
-// ============================================
 function deleteComment(articleId, commentId) {
     const article = savedComments.find(a => a.id === articleId);
     if (article) {
@@ -166,55 +217,8 @@ function deleteComment(articleId, commentId) {
     }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // ============================================
-// NEU: GitHub-Kommentare beim Start laden
-// ============================================
-async function loadCommentsFromGitHub() {
-    try {
-        const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/comments.json`);
-        if (response.ok) {
-            const githubComments = await response.json();
-            loadSavedComments();
-            
-            githubComments.forEach(gc => {
-                const exists = savedComments.some(sc =>
-                    sc.comments && sc.comments.some(c =>
-                        c.text === gc.comment && c.articleTitle === gc.article
-                    )
-                );
-                if (!exists) {
-                    savedComments.push({
-                        id: "gh_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
-                        title: gc.article,
-                        link: "#",
-                        summary: "",
-                        originalDate: gc.date,
-                        comments: [{
-                            id: Date.now() + Math.floor(Math.random() * 1000),
-                            text: gc.comment,
-                            date: gc.date,
-                            articleTitle: gc.article,
-                            articleLink: "#"
-                        }]
-                    });
-                }
-            });
-            saveComments();
-        }
-    } catch(e) {
-        loadSavedComments();
-    }
-}
-
-// ============================================
-// UNVERÄNDERT: loadFeed
+// FEEDS LADEN
 // ============================================
 async function loadFeed(feedKey, clickedButton) {
     document.querySelectorAll('.feed-selector button').forEach(btn => {
@@ -292,9 +296,10 @@ async function loadFeed(feedKey, clickedButton) {
 }
 
 // ============================================
-// UNVERÄNDERT: showCommentedNews
+// KOMMENTARE ANZEIGEN
 // ============================================
-function showCommentedNews() {
+async function showCommentedNews() {
+    await loadCommentsFromGitHub();
     loadSavedComments();
     
     if (savedComments.length === 0) {
@@ -314,16 +319,18 @@ function showCommentedNews() {
     
     let allComments = [];
     savedComments.forEach(article => {
-        article.comments.forEach(comment => {
-            allComments.push({
-                id: comment.id,
-                text: comment.text,
-                date: comment.date,
-                articleId: article.id,
-                articleTitle: article.title,
-                articleLink: article.link
+        if (article.comments && Array.isArray(article.comments)) {
+            article.comments.forEach(comment => {
+                allComments.push({
+                    id: comment.id,
+                    text: comment.text,
+                    date: comment.date,
+                    articleId: article.id,
+                    articleTitle: comment.articleTitle || article.title,
+                    articleLink: comment.articleLink || article.link
+                });
             });
-        });
+        }
     });
     
     allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -361,9 +368,6 @@ function showCommentedNews() {
     if (commentsBtn) commentsBtn.classList.add('active');
 }
 
-// ============================================
-// UNVERÄNDERT: formatGreeting
-// ============================================
 function formatGreeting() {
     const greetingElement = document.getElementById('greeting');
     if (greetingElement) {
@@ -373,10 +377,10 @@ function formatGreeting() {
 }
 
 // ============================================
-// NEU: GitHub-Kommentare laden BEVOR der Feed geladen wird
+// START
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
-    await loadCommentsFromGitHub();  // NEU: Erst GitHub-Kommentare holen
+    await loadCommentsFromGitHub();
     loadSavedComments();
     formatGreeting();
     const firstButton = document.querySelector('.feed-selector button:first-child');
