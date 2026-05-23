@@ -1,11 +1,9 @@
 // ============================================
-// KONFIGURATION - HIER DEIN REPO EINTRAGEN!
+// NEU: HIER DEINEN TOKEN UND REPO EINTRAGEN!
 // ============================================
-const GITHUB_REPO = "schlangoo/haschismusheute"; // Z.B. "Haschist/Haschismus-Heute"
+const GITHUB_TOKEN = "ghp_hier_deinen_token_eintragen";
+const GITHUB_REPO = "schlangoo/haschismusheute";
 
-// ============================================
-// RSS FEEDS
-// ============================================
 const RSS_FEEDS = {
     deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
     tass: "https://tass.com/rss/v2.xml",
@@ -15,14 +13,8 @@ const RSS_FEEDS = {
     irna: "https://en.irna.ir/rss"
 };
 
-// ============================================
-// GLOBALE VARIABLEN
-// ============================================
 let savedComments = [];
 
-// ============================================
-// HILFSFUNKTIONEN
-// ============================================
 function formatStrikethrough(text) {
     if (!text) return '';
     return text.replace(/--(.*?)--/g, '<s>$1</s>');
@@ -65,15 +57,8 @@ function safeBase64Decode(str) {
     }
 }
 
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
 // ============================================
-// KOMMENTAR FUNKTIONEN (NEU: GitHub Issues!)
+// NEU: KOMMENTAR SPEICHERN (mit GitHub im Hintergrund)
 // ============================================
 function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
@@ -81,90 +66,93 @@ function saveComment(articleId) {
     
     const commentText = textarea.value.trim();
     if (!commentText) {
-        alert("Bitte etwas schreiben, Genosse.");
+        alert("Bitte etwas schreiben.");
         return false;
     }
     
     const articleDiv = document.getElementById(`article-${articleId}`);
     if (!articleDiv) return false;
     
-    // Titel für das Issue holen
     const titleEncoded = articleDiv.getAttribute('data-title') || "";
-    let titleDecoded = "Unbekannter Titel";
-    try {
-        if (titleEncoded && titleEncoded !== "") {
-            const decoded = safeBase64Decode(titleEncoded);
-            if (decoded && decoded !== "") titleDecoded = decoded;
-        }
-    } catch(e) {}
-    
-    // Issue-URL für GitHub bauen
-    const issueTitle = encodeURIComponent(`Kommentar: ${articleId}`);
-    const issueBody = encodeURIComponent(
-        `**Artikel:** ${titleDecoded}\n\n` +
-        `**Kommentar:**\n${commentText}\n\n` +
-        `---\n` +
-        `*Artikel-ID: ${articleId}*`
-    );
-    
-    const issueUrl = `https://github.com/${GITHUB_REPO}/issues/new?title=${issueTitle}&body=${issueBody}&labels=kommentar`;
-    
-    // In neuem Tab öffnen - JEDER kann das, auch ohne GitHub-Account!
-    window.open(issueUrl, '_blank');
-    
-    // Trotzdem lokal speichern (als Vorschau, bis die Action verarbeitet hat)
     const linkEncoded = articleDiv.getAttribute('data-link') || "";
     const summaryEncoded = articleDiv.getAttribute('data-summary') || "";
     const dateEncoded = articleDiv.getAttribute('data-date') || "";
     
-    let linkDecoded = "#";
-    let summaryDecoded = "";
-    let dateDecoded = new Date().toISOString();
+    let title = "Unbekannter Titel";
+    let link = "#";
+    let summary = "";
+    let date = new Date().toISOString();
     
     try {
+        if (titleEncoded && titleEncoded !== "") {
+            const decoded = safeBase64Decode(titleEncoded);
+            if (decoded && decoded !== "") title = decoded;
+        }
         if (linkEncoded && linkEncoded !== "") {
             const decoded = safeBase64Decode(linkEncoded);
-            if (decoded && decoded !== "") linkDecoded = decoded;
+            if (decoded && decoded !== "") link = decoded;
         }
         if (summaryEncoded && summaryEncoded !== "") {
             const decoded = safeBase64Decode(summaryEncoded);
-            if (decoded && decoded !== "") summaryDecoded = decoded;
+            if (decoded && decoded !== "") summary = decoded;
         }
         if (dateEncoded && dateEncoded !== "") {
             const decoded = safeBase64Decode(dateEncoded);
-            if (decoded && decoded !== "") dateDecoded = decoded;
+            if (decoded && decoded !== "") date = decoded;
         }
     } catch(e) {}
     
+    // Kommentar erstellen
     const commentEntry = {
         id: Date.now(),
         text: commentText,
         date: new Date().toISOString(),
-        articleTitle: titleDecoded,
-        articleLink: linkDecoded
+        articleTitle: title,
+        articleLink: link
     };
     
+    // 1. LOKAL SPEICHERN
     const existingIndex = savedComments.findIndex(item => item.id === articleId);
     if (existingIndex !== -1) {
         savedComments[existingIndex].comments.push(commentEntry);
     } else {
         savedComments.push({
             id: articleId,
-            title: titleDecoded,
-            link: linkDecoded,
-            summary: summaryDecoded,
-            originalDate: dateDecoded,
+            title: title,
+            link: link,
+            summary: summary,
+            originalDate: date,
             comments: [commentEntry]
         });
     }
-    
     saveComments();
     
-    alert("Kommentar eingereicht! Bitte im neuen Tab auf 'Submit new issue' klicken. Kein Login nötig, Genosse! ✊\n\nDer Kommentar erscheint in wenigen Minuten auf der Seite.");
+    // 2. AN GITHUB SENDEN (Hintergrund, merkt keiner)
+    fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${GITHUB_TOKEN}`,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            event_type: 'save_comment',
+            client_payload: {
+                article: title,
+                comment: commentText,
+                date: new Date().toISOString()
+            }
+        })
+    }).catch(() => {}); // Leise scheitern - lokal ist es ja gespeichert
+    
+    alert("Kommentar gespeichert.");
     textarea.value = "";
     return true;
 }
 
+// ============================================
+// UNVERÄNDERT: deleteComment
+// ============================================
 function deleteComment(articleId, commentId) {
     const article = savedComments.find(a => a.id === articleId);
     if (article) {
@@ -178,40 +166,61 @@ function deleteComment(articleId, commentId) {
     }
 }
 
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // ============================================
-// KOMMENTARE VON GITHUB LADEN
+// NEU: GitHub-Kommentare beim Start laden
 // ============================================
 async function loadCommentsFromGitHub() {
     try {
         const response = await fetch(`https://raw.githubusercontent.com/${GITHUB_REPO}/main/comments.json`);
         if (response.ok) {
-            const data = await response.json();
-            savedComments = data;
-            saveComments(); // Auch in localStorage speichern
-            console.log("✅ Kommentare von GitHub geladen:", savedComments.length, "Einträge");
-            return true;
-        } else {
-            console.log("ℹ️ Noch keine comments.json auf GitHub, nutze localStorage");
+            const githubComments = await response.json();
+            loadSavedComments();
+            
+            githubComments.forEach(gc => {
+                const exists = savedComments.some(sc =>
+                    sc.comments && sc.comments.some(c =>
+                        c.text === gc.comment && c.articleTitle === gc.article
+                    )
+                );
+                if (!exists) {
+                    savedComments.push({
+                        id: "gh_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+                        title: gc.article,
+                        link: "#",
+                        summary: "",
+                        originalDate: gc.date,
+                        comments: [{
+                            id: Date.now() + Math.floor(Math.random() * 1000),
+                            text: gc.comment,
+                            date: gc.date,
+                            articleTitle: gc.article,
+                            articleLink: "#"
+                        }]
+                    });
+                }
+            });
+            saveComments();
         }
     } catch(e) {
-        console.log("ℹ️ GitHub nicht erreichbar, nutze localStorage:", e.message);
+        loadSavedComments();
     }
-    
-    // Fallback: localStorage nutzen
-    loadSavedComments();
-    return false;
 }
 
 // ============================================
-// FEEDS LADEN
+// UNVERÄNDERT: loadFeed
 // ============================================
 async function loadFeed(feedKey, clickedButton) {
     document.querySelectorAll('.feed-selector button').forEach(btn => {
         btn.classList.remove('active');
     });
-    if (clickedButton) {
-        clickedButton.classList.add('active');
-    }
+    clickedButton.classList.add('active');
     
     const feedUrl = RSS_FEEDS[feedKey];
     if (!feedUrl) {
@@ -283,7 +292,7 @@ async function loadFeed(feedKey, clickedButton) {
 }
 
 // ============================================
-// KOMMENTIERTE ARTIKEL ANZEIGEN
+// UNVERÄNDERT: showCommentedNews
 // ============================================
 function showCommentedNews() {
     loadSavedComments();
@@ -293,10 +302,6 @@ function showCommentedNews() {
             <div class="empty-comments">
                 <p>Keine Kommentare gespeichert.</p>
                 <p>Wähle einen Feed und schreibe etwas.</p>
-                <p style="margin-top: 10px; font-size: 0.75rem; color: #999;">
-                    💡 Tipp: Kommentare werden über GitHub Issues gespeichert.<br>
-                    Kein Login nötig, Genosse!
-                </p>
             </div>
         `;
         document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
@@ -309,18 +314,16 @@ function showCommentedNews() {
     
     let allComments = [];
     savedComments.forEach(article => {
-        if (article.comments && Array.isArray(article.comments)) {
-            article.comments.forEach(comment => {
-                allComments.push({
-                    id: comment.id,
-                    text: comment.text,
-                    date: comment.date,
-                    articleId: article.id,
-                    articleTitle: comment.articleTitle || article.title,
-                    articleLink: comment.articleLink || article.link
-                });
+        article.comments.forEach(comment => {
+            allComments.push({
+                id: comment.id,
+                text: comment.text,
+                date: comment.date,
+                articleId: article.id,
+                articleTitle: article.title,
+                articleLink: article.link
             });
-        }
+        });
     });
     
     allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -359,27 +362,23 @@ function showCommentedNews() {
 }
 
 // ============================================
-// GRUSS FORMATIEREN
+// UNVERÄNDERT: formatGreeting
 // ============================================
 function formatGreeting() {
     const greetingElement = document.getElementById('greeting');
     if (greetingElement) {
-        const originalText = greetingElement.textContent;
+        const originalText = greetingElement.innerHTML;
         greetingElement.innerHTML = formatStrikethrough(escapeHtml(originalText));
     }
 }
 
 // ============================================
-// INITIALISIERUNG
+// NEU: GitHub-Kommentare laden BEVOR der Feed geladen wird
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Kommentare von GitHub laden (oder localStorage als Fallback)
-    await loadCommentsFromGitHub();
-    
-    // 2. Gruß formatieren
+    await loadCommentsFromGitHub();  // NEU: Erst GitHub-Kommentare holen
+    loadSavedComments();
     formatGreeting();
-    
-    // 3. Ersten Feed laden
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
         loadFeed('deutschlandfunk', firstButton);
