@@ -1,7 +1,6 @@
 // ============================================
-// NEU: HIER DEINEN TOKEN UND REPO EINTRAGEN!
+// KONFIGURATION
 // ============================================
-const GITHUB_TOKEN = "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";
 const GITHUB_REPO = "schlangoo/haschismusheute";
 
 const RSS_FEEDS = {
@@ -94,11 +93,11 @@ async function loadCommentsFromGitHub() {
                         title: gc.article,
                         link: "#",
                         summary: "",
-                        originalDate: gc.date,
+                        originalDate: gc.date || "",
                         comments: [{
                             id: Date.now() + Math.floor(Math.random() * 1000),
                             text: gc.comment,
-                            date: gc.date,
+                            date: gc.date || "",
                             articleTitle: gc.article,
                             articleLink: "#"
                         }]
@@ -106,14 +105,16 @@ async function loadCommentsFromGitHub() {
                 }
             });
             saveComments();
+            return true;
         }
     } catch(e) {
-        loadSavedComments();
+        console.log("GitHub nicht erreichbar, nutze lokale Daten");
     }
+    return false;
 }
 
 // ============================================
-// KOMMENTAR SPEICHERN
+// KOMMENTAR SPEICHERN - MIT UNSICHTBAREM IFRAME!
 // ============================================
 function saveComment(articleId) {
     const textarea = document.getElementById(`comment-${articleId}`);
@@ -165,7 +166,7 @@ function saveComment(articleId) {
         articleLink: link
     };
     
-    // LOKAL SPEICHERN
+    // LOKAL SPEICHERN (sofort sichtbar)
     const existingIndex = savedComments.findIndex(item => item.id === articleId);
     if (existingIndex !== -1) {
         savedComments[existingIndex].comments.push(commentEntry);
@@ -181,26 +182,29 @@ function saveComment(articleId) {
     }
     saveComments();
     
-    // AN GITHUB SENDEN
-        fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-            'Authorization': `Bearer ${GITHUB_TOKEN}`,
-            'Accept': 'application/vnd.github.v3+json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            event_type: 'save_comment',
-            client_payload: {
-                article: title,
-                comment: commentText,
-                date: new Date().toISOString()
-            }
-        })
-    }).catch(() => {});
+    // UNSICHTBARES ISSUE ERSTELLEN (iframe-Trick!)
+    const issueTitle = encodeURIComponent("Kommentar: " + title.substring(0, 50));
+    const issueBody = encodeURIComponent(
+        "KOMMENTAR:\n" + commentText + "\n\n" +
+        "ARTIKEL:\n" + title
+    );
+    const issueUrl = "https://github.com/" + GITHUB_REPO + "/issues/new?title=" + issueTitle + "&body=" + issueBody + "&labels=kommentar";
     
-    alert("Kommentar gespeichert.");
+    // Unsichtbaren iframe erstellen
+    const iframe = document.createElement('iframe');
+    iframe.src = issueUrl;
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = 'none';
+    document.body.appendChild(iframe);
+    
+    // iframe nach 3 Sekunden entfernen
+    setTimeout(() => {
+        document.body.removeChild(iframe);
+    }, 3000);
+    
+    alert("Kommentar gespeichert!");
     textarea.value = "";
     return true;
 }
