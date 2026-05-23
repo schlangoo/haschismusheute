@@ -182,8 +182,9 @@ function saveComment(articleId) {
     saveComments();
     
     // AN GITHUB SENDEN
-    fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
+        fetch(`https://api.github.com/repos/${GITHUB_REPO}/dispatches`, {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
             'Authorization': `Bearer ${GITHUB_TOKEN}`,
             'Accept': 'application/vnd.github.v3+json',
