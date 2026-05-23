@@ -1,7 +1,7 @@
 // ============================================
 // NEU: HIER DEINEN TOKEN UND REPO EINTRAGEN!
 // ============================================
-const GITHUB_TOKEN = "ghp_hier_deinen_token_eintragen";
+const GITHUB_TOKEN = "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";
 const GITHUB_REPO = "schlangoo/haschismusheute";
 
 const RSS_FEEDS = {
