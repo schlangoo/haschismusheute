@@ -154,7 +154,9 @@ async function loadFeed(feedKey, clickedButton) {
     }
     
     try {
-        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`);
+        // Cache-Busting: Zeitstempel an die URL anhängen
+        const cacheBuster = `&_=${Date.now()}`;
+        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}${cacheBuster}`);
         const data = await response.json();
         
         if (!data.items || data.items.length === 0) {
