@@ -213,9 +213,10 @@ async function loadFeed(feedKey, clickedButton) {
         
         document.getElementById("feed-content").innerHTML = feedHTML;
         
-    } catch (error) {
-        document.getElementById("feed-content").innerHTML = `<p class="error">Fehler beim Laden.</p>`;
-    }
+} catch (error) {
+    console.error("Feed error:", error);
+    document.getElementById("feed-content").innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
+}
 }
 
 function showCommentedNews() {
