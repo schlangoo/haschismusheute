@@ -1,11 +1,14 @@
 const RSS_FEEDS = {
-    deutschlandfunk: "https://www.deutschlandfunk.de/nachrichten-100.rss",
+    deutschlandfunk: "https://www.deutschlandfunk.de/die-nachrichten.353.de.rss",
     tass: "https://tass.com/rss/v2.xml",
-    aljazeera: "http://www.aljazeera.com/xml/rss/all.xml",
+    aljazeera: "https://www.aljazeera.com/xml/rss/all.xml",
     trumpino: "https://www.trumpstruth.org/feed",
     scmp: "https://www.scmp.com/rss/91/feed/",
     irna: "https://en.irna.ir/rss"
 };
+
+// CORS-Proxy, der rohes XML zurückgibt
+const CORS_PROXY = "https://corsproxy.io/?";
 
 let savedComments = [];
 
@@ -145,7 +148,7 @@ async function loadFeed(feedKey, clickedButton) {
     document.querySelectorAll('.feed-selector button').forEach(btn => {
         btn.classList.remove('active');
     });
-    clickedButton.classList.add('active');
+    if (clickedButton) clickedButton.classList.add('active');
     
     const feedUrl = RSS_FEEDS[feedKey];
     if (!feedUrl) {
@@ -153,45 +156,87 @@ async function loadFeed(feedKey, clickedButton) {
         return;
     }
     
+    const contentDiv = document.getElementById("feed-content");
+    contentDiv.innerHTML = `<p class="no-articles">Lade Feed…</p>`;
+    
     try {
-        // Cache-Busting: Zeitstempel an die URL anhängen
-        const cacheBuster = `&_=${Date.now()}`;
-        const response = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}${cacheBuster}`);
-        const data = await response.json();
+        // CORS-Proxy: rohes XML anfordern
+        const proxyUrl = CORS_PROXY + encodeURIComponent(feedUrl);
+        const response = await fetch(proxyUrl);
         
-        if (!data.items || data.items.length === 0) {
-            document.getElementById("feed-content").innerHTML = `<p class="no-articles">Keine Artikel gefunden.</p>`;
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        
+        const xmlText = await response.text();
+        
+        // XML mit DOMParser parsen
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        
+        // Parsing-Fehler prüfen
+        const parserError = xmlDoc.querySelector("parsererror");
+        if (parserError) {
+            throw new Error("XML konnte nicht geparst werden");
+        }
+        
+        // RSS <item> oder Atom <entry> unterstützen
+        let items = xmlDoc.querySelectorAll("item");
+        if (items.length === 0) {
+            items = xmlDoc.querySelectorAll("entry");
+        }
+        
+        if (items.length === 0) {
+            contentDiv.innerHTML = `<p class="no-articles">Keine Artikel gefunden.</p>`;
             return;
         }
         
         let feedHTML = "";
-        data.items.forEach((item, index) => {
-            let cleanDescription = "";
-            if (item.description && item.description !== "undefined") {
-                cleanDescription = item.description.replace(/<[^>]*>/g, "").substring(0, 280);
-                if (cleanDescription.length > 0) cleanDescription += "...";
+        items.forEach((item, index) => {
+            // Titel
+            const titleEl = item.querySelector("title");
+            const title = titleEl ? titleEl.textContent.trim() : "Unbekannter Titel";
+            
+            // Link: RSS <link> vs Atom <link href="">
+            let link = "#";
+            const linkEl = item.querySelector("link");
+            if (linkEl) {
+                if (linkEl.getAttribute("href")) {
+                    link = linkEl.getAttribute("href");
+                } else {
+                    link = linkEl.textContent.trim();
+                }
             }
             
+            // Beschreibung
+            let description = "";
+            const descEl = item.querySelector("description") || item.querySelector("summary") || item.querySelector("content");
+            if (descEl) {
+                description = descEl.textContent.trim();
+            }
+            // HTML-Tags entfernen, auf 280 Zeichen kürzen
+            let cleanDescription = description.replace(/<[^>]*>/g, "").substring(0, 280);
+            if (cleanDescription.length > 0 && description.length > 280) cleanDescription += "...";
+            
+            // Datum
             let formattedDate = "";
-            if (item.pubDate && item.pubDate !== "undefined") {
+            const dateEl = item.querySelector("pubDate") || item.querySelector("published") || item.querySelector("updated");
+            if (dateEl) {
                 try {
-                    const dateObj = new Date(item.pubDate);
+                    const dateObj = new Date(dateEl.textContent.trim());
                     if (!isNaN(dateObj.getTime())) {
                         formattedDate = dateObj.toLocaleDateString();
                     }
                 } catch(e) {}
             }
             
-            let title = item.title || "Unbekannter Titel";
-            const link = item.link || "#";
             const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
-            
             const formattedTitle = formatStrikethrough(escapeHtml(title));
             
             const safeTitle = safeBase64Encode(title);
             const safeLink = safeBase64Encode(link);
             const safeSummary = safeBase64Encode(cleanDescription);
-            const safeDate = safeBase64Encode(item.pubDate || "");
+            const safeDate = safeBase64Encode(dateEl ? dateEl.textContent.trim() : "");
             
             feedHTML += `
                 <div class="feed-item" id="article-${articleId}" 
@@ -199,7 +244,7 @@ async function loadFeed(feedKey, clickedButton) {
                      data-link="${safeLink}" 
                      data-summary="${safeSummary}" 
                      data-date="${safeDate}">
-                    <h3><a href="${link}" target="_blank" rel="noopener noreferrer">${formattedTitle}</a></h3>
+                    <h3><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${formattedTitle}</a></h3>
                     <p>${escapeHtml(cleanDescription)}</p>
                     <small>${escapeHtml(formattedDate)}</small>
                     
@@ -211,12 +256,12 @@ async function loadFeed(feedKey, clickedButton) {
             `;
         });
         
-        document.getElementById("feed-content").innerHTML = feedHTML;
+        contentDiv.innerHTML = feedHTML;
         
-} catch (error) {
-    console.error("Feed error:", error);
-    document.getElementById("feed-content").innerHTML = `<p class="error">Fehler: ${error.message}</p>`;
-}
+    } catch (error) {
+        console.error("Feed-Fehler:", error);
+        contentDiv.innerHTML = `<p class="error">Fehler beim Laden: ${escapeHtml(error.message)}</p>`;
+    }
 }
 
 function showCommentedNews() {
@@ -302,4 +347,3 @@ document.addEventListener('DOMContentLoaded', () => {
         loadFeed('deutschlandfunk', firstButton);
     }
 });
- 
