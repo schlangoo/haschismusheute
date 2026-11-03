@@ -8,7 +8,7 @@ const RSS_FEEDS = {
 };
 
 // CORS-Proxy, der rohes XML zurückgibt
-const CORS_PROXY = "https://api.cors.lol/?url=";
+const CORS_PROXY = "https://corsproxy.io/?url=";
 
 let savedComments = [];
 
