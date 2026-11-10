@@ -22,20 +22,20 @@ h1 {
 .greeting {
     color: #666;
     font-size: 0.85rem;
-    margin-bottom: 32px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eaeaea;
+    margin-bottom: 16px;
 }
 
 .greeting s {
     color: #999;
 }
 
-/* Neue externe Links (Buttons unter der Unterüberschrift) */
+/* Externe Links (Buttons unter der Unterüberschrift) */
 .external-links {
     display: flex;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eaeaea;
     flex-wrap: wrap;
 }
 
