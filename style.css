@@ -31,6 +31,36 @@ h1 {
     color: #999;
 }
 
+/* Neue externe Links (Buttons unter der Unterüberschrift) */
+.external-links {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.external-btn {
+    display: inline-block;
+    padding: 8px 16px;
+    background: #f5f5f5;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.external-btn:hover {
+    background: #eaeaea;
+}
+
+.external-btn .red-star {
+    color: #c00000;
+}
+
 .feed-selector {
     display: flex;
     gap: 8px;
@@ -275,7 +305,8 @@ button.active .red-star {
         font-size: 1.5rem;
     }
     
-    button {
+    button,
+    .external-btn {
         padding: 6px 12px;
         font-size: 0.75rem;
     }
