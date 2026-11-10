@@ -7,29 +7,11 @@ const RSS_FEEDS = {
     irna: "https://en.irna.ir/rss"
 };
 
-// CORS-Proxy, der rohes XML zurückgibt
 const CORS_PROXY = "https://proxy.cors.dev/";
-
-let savedComments = [];
 
 function formatStrikethrough(text) {
     if (!text) return '';
     return text.replace(/--(.*?)--/g, '<s>$1</s>');
-}
-
-function loadSavedComments() {
-    const saved = localStorage.getItem('comments');
-    if (saved) {
-        try {
-            savedComments = JSON.parse(saved);
-        } catch(e) {
-            savedComments = [];
-        }
-    }
-}
-
-function saveComments() {
-    localStorage.setItem('comments', JSON.stringify(savedComments));
 }
 
 function safeBase64Encode(str) {
@@ -40,100 +22,6 @@ function safeBase64Encode(str) {
         }));
     } catch(e) {
         return "";
-    }
-}
-
-function safeBase64Decode(str) {
-    if (!str || str === "") return "";
-    try {
-        return decodeURIComponent(atob(str).split('').map(function(c) {
-            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-    } catch(e) {
-        return str;
-    }
-}
-
-function saveComment(articleId) {
-    const textarea = document.getElementById(`comment-${articleId}`);
-    if (!textarea) return false;
-    
-    const commentText = textarea.value.trim();
-    if (!commentText) {
-        alert("Bitte etwas schreiben.");
-        return false;
-    }
-    
-    const articleDiv = document.getElementById(`article-${articleId}`);
-    if (!articleDiv) return false;
-    
-    const titleEncoded = articleDiv.getAttribute('data-title') || "";
-    const linkEncoded = articleDiv.getAttribute('data-link') || "";
-    const summaryEncoded = articleDiv.getAttribute('data-summary') || "";
-    const dateEncoded = articleDiv.getAttribute('data-date') || "";
-    
-    let title = "Unbekannter Titel";
-    let link = "#";
-    let summary = "";
-    let date = new Date().toISOString();
-    
-    try {
-        if (titleEncoded && titleEncoded !== "") {
-            const decoded = safeBase64Decode(titleEncoded);
-            if (decoded && decoded !== "") title = decoded;
-        }
-        if (linkEncoded && linkEncoded !== "") {
-            const decoded = safeBase64Decode(linkEncoded);
-            if (decoded && decoded !== "") link = decoded;
-        }
-        if (summaryEncoded && summaryEncoded !== "") {
-            const decoded = safeBase64Decode(summaryEncoded);
-            if (decoded && decoded !== "") summary = decoded;
-        }
-        if (dateEncoded && dateEncoded !== "") {
-            const decoded = safeBase64Decode(dateEncoded);
-            if (decoded && decoded !== "") date = decoded;
-        }
-    } catch(e) {}
-    
-    const existingIndex = savedComments.findIndex(item => item.id === articleId);
-    const commentEntry = {
-        id: Date.now(),
-        text: commentText,
-        date: new Date().toISOString(),
-        articleTitle: title,
-        articleLink: link
-    };
-    
-    if (existingIndex !== -1) {
-        savedComments[existingIndex].comments.push(commentEntry);
-    } else {
-        savedComments.push({
-            id: articleId,
-            title: title,
-            link: link,
-            summary: summary,
-            originalDate: date,
-            comments: [commentEntry]
-        });
-    }
-    
-    saveComments();
-    alert("Kommentar gespeichert.");
-    textarea.value = "";
-    return true;
-}
-
-function deleteComment(articleId, commentId) {
-    const article = savedComments.find(a => a.id === articleId);
-    if (article) {
-        article.comments = article.comments.filter(c => c.id !== commentId);
-        if (article.comments.length === 0) {
-            const index = savedComments.findIndex(a => a.id === articleId);
-            if (index !== -1) savedComments.splice(index, 1);
-        }
-        saveComments();
-        showCommentedNews();
     }
 }
 
@@ -160,7 +48,6 @@ async function loadFeed(feedKey, clickedButton) {
     contentDiv.innerHTML = `<p class="no-articles">Lade Feed…</p>`;
     
     try {
-        // CORS-Proxy: rohes XML anfordern
         const proxyUrl = CORS_PROXY + encodeURIComponent(feedUrl);
         const response = await fetch(proxyUrl);
         
@@ -170,17 +57,14 @@ async function loadFeed(feedKey, clickedButton) {
         
         const xmlText = await response.text();
         
-        // XML mit DOMParser parsen
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         
-        // Parsing-Fehler prüfen
         const parserError = xmlDoc.querySelector("parsererror");
         if (parserError) {
             throw new Error("XML konnte nicht geparst werden");
         }
         
-        // RSS <item> oder Atom <entry> unterstützen
         let items = xmlDoc.querySelectorAll("item");
         if (items.length === 0) {
             items = xmlDoc.querySelectorAll("entry");
@@ -193,11 +77,9 @@ async function loadFeed(feedKey, clickedButton) {
         
         let feedHTML = "";
         items.forEach((item, index) => {
-            // Titel
             const titleEl = item.querySelector("title");
             const title = titleEl ? titleEl.textContent.trim() : "Unbekannter Titel";
             
-            // Link: RSS <link> vs Atom <link href="">
             let link = "#";
             const linkEl = item.querySelector("link");
             if (linkEl) {
@@ -208,17 +90,14 @@ async function loadFeed(feedKey, clickedButton) {
                 }
             }
             
-            // Beschreibung
             let description = "";
             const descEl = item.querySelector("description") || item.querySelector("summary") || item.querySelector("content");
             if (descEl) {
                 description = descEl.textContent.trim();
             }
-            // HTML-Tags entfernen, auf 280 Zeichen kürzen
             let cleanDescription = description.replace(/<[^>]*>/g, "").substring(0, 280);
             if (cleanDescription.length > 0 && description.length > 280) cleanDescription += "...";
             
-            // Datum
             let formattedDate = "";
             const dateEl = item.querySelector("pubDate") || item.querySelector("published") || item.querySelector("updated");
             if (dateEl) {
@@ -230,28 +109,13 @@ async function loadFeed(feedKey, clickedButton) {
                 } catch(e) {}
             }
             
-            const articleId = "art_" + Date.now() + "_" + index + "_" + Math.random().toString(36).substr(2, 8);
             const formattedTitle = formatStrikethrough(escapeHtml(title));
             
-            const safeTitle = safeBase64Encode(title);
-            const safeLink = safeBase64Encode(link);
-            const safeSummary = safeBase64Encode(cleanDescription);
-            const safeDate = safeBase64Encode(dateEl ? dateEl.textContent.trim() : "");
-            
             feedHTML += `
-                <div class="feed-item" id="article-${articleId}" 
-                     data-title="${safeTitle}" 
-                     data-link="${safeLink}" 
-                     data-summary="${safeSummary}" 
-                     data-date="${safeDate}">
+                <div class="feed-item">
                     <h3><a href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">${formattedTitle}</a></h3>
                     <p>${escapeHtml(cleanDescription)}</p>
                     <small>${escapeHtml(formattedDate)}</small>
-                    
-                    <div class="comment-section">
-                        <textarea id="comment-${articleId}" class="comment-input" placeholder="Kommentar" maxlength="300" rows="1"></textarea>
-                        <button class="save-comment-btn" onclick="saveComment('${articleId}')">Speichern</button>
-                    </div>
                 </div>
             `;
         });
@@ -264,73 +128,6 @@ async function loadFeed(feedKey, clickedButton) {
     }
 }
 
-function showCommentedNews() {
-    loadSavedComments();
-    
-    if (savedComments.length === 0) {
-        document.getElementById("feed-content").innerHTML = `
-            <div class="empty-comments">
-                <p>Keine Kommentare gespeichert.</p>
-                <p>Wähle einen Feed und schreibe etwas.</p>
-            </div>
-        `;
-        document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-        const commentsBtn = document.getElementById('comments-btn');
-        if (commentsBtn) commentsBtn.classList.add('active');
-        return;
-    }
-    
-    let html = `<div class="comments-collection">`;
-    
-    let allComments = [];
-    savedComments.forEach(article => {
-        article.comments.forEach(comment => {
-            allComments.push({
-                id: comment.id,
-                text: comment.text,
-                date: comment.date,
-                articleId: article.id,
-                articleTitle: article.title,
-                articleLink: article.link
-            });
-        });
-    });
-    
-    allComments.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    allComments.forEach(comment => {
-        const commentDate = new Date(comment.date).toLocaleString();
-        const formattedComment = formatStrikethrough(escapeHtml(comment.text));
-        const formattedTitle = formatStrikethrough(escapeHtml(comment.articleTitle));
-        
-        html += `
-            <div class="commented-article" data-comment-id="${comment.id}" data-article-id="${comment.articleId}">
-                <div class="comment-text">
-                    <p>${formattedComment}</p>
-                    <div class="comment-meta">
-                        <span class="comment-to">zu</span>
-                        <span class="article-title-link">${formattedTitle}</span>
-                    </div>
-                </div>
-                <div class="comment-link">
-                    <a href="${escapeHtml(comment.articleLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(comment.articleLink)}</a>
-                </div>
-                <div class="comment-meta" style="margin-top: 6px; justify-content: space-between;">
-                    <small>${escapeHtml(commentDate)}</small>
-                    <button class="delete-comment-btn" onclick="deleteComment('${comment.articleId}', ${comment.id})">Löschen</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    html += `</div>`;
-    document.getElementById("feed-content").innerHTML = html;
-    
-    document.querySelectorAll('.feed-selector button').forEach(btn => btn.classList.remove('active'));
-    const commentsBtn = document.getElementById('comments-btn');
-    if (commentsBtn) commentsBtn.classList.add('active');
-}
-
 function formatGreeting() {
     const greetingElement = document.getElementById('greeting');
     if (greetingElement) {
@@ -340,7 +137,6 @@ function formatGreeting() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    loadSavedComments();
     formatGreeting();
     const firstButton = document.querySelector('.feed-selector button:first-child');
     if (firstButton) {
